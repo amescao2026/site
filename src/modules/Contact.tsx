@@ -28,18 +28,18 @@ export default function Contact() {
   };
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#0A0A0A] text-[#F5F5F5]' : 'bg-[#FEFEFE] text-[#1A1A1A]'}`}>
+    <div className="min-h-screen bg-app text-main">
       <Navbar />
       
       <section className="pt-32 pb-24 px-4">
         <div className="max-w-6xl mx-auto">
-          <motion.div
+            <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-16"
           >
             <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4">{t.contact.title}</h1>
-            <p className="text-xl text-zinc-500">Nous sommes à votre écoute pour toute question ou suggestion.</p>
+            <p className="text-xl text-body">Nous sommes à votre écoute pour toute question ou suggestion.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-16">
@@ -89,42 +89,42 @@ export default function Contact() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className="bg-white dark:bg-zinc-900 p-8 rounded-3xl shadow-2xl shadow-black/5"
+              className="card p-8 rounded-3xl shadow-2xl"
             >
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-bold uppercase tracking-widest mb-2 opacity-60">{t.contact.formName}</label>
+                  <label className="block text-sm font-bold uppercase tracking-widest mb-2 text-muted">{t.contact.formName}</label>
                   <input 
                     type="text" 
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-6 py-4 bg-[#F9FAFB] dark:bg-[#1A1A1A] border-none rounded-2xl focus:ring-2 focus:ring-[#059669] transition-all"
+                    className="w-full px-6 py-4 bg-card border border-subtle rounded-2xl focus:ring-2 focus:ring-primary text-body placeholder:text-muted transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold uppercase tracking-widest mb-2 opacity-60">{t.contact.formEmail}</label>
+                  <label className="block text-sm font-bold uppercase tracking-widest mb-2 text-muted">{t.contact.formEmail}</label>
                   <input 
                     type="email" 
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full px-6 py-4 bg-[#F9FAFB] dark:bg-[#1A1A1A] border-none rounded-2xl focus:ring-2 focus:ring-[#059669] transition-all"
+                    className="w-full px-6 py-4 bg-card border border-subtle rounded-2xl focus:ring-2 focus:ring-primary text-body placeholder:text-muted transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold uppercase tracking-widest mb-2 opacity-60">{t.contact.formMessage}</label>
+                  <label className="block text-sm font-bold uppercase tracking-widest mb-2 text-muted">{t.contact.formMessage}</label>
                   <textarea 
                     rows={5}
                     required
                     value={formData.message}
                     onChange={(e) => setFormData({...formData, message: e.target.value})}
-                    className="w-full px-6 py-4 bg-[#F9FAFB] dark:bg-[#1A1A1A] border-none rounded-2xl focus:ring-2 focus:ring-[#059669] transition-all resize-none"
+                    className="w-full px-6 py-4 bg-card border border-subtle rounded-2xl focus:ring-2 focus:ring-primary text-body placeholder:text-muted transition-all resize-none"
                   ></textarea>
                 </div>
                 <button 
                   type="submit"
-                  className="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold text-lg transition-all shadow-xl shadow-emerald-900/20 flex items-center justify-center gap-2"
+                  className="w-full py-5 btn-primary hover:bg-primary-700 text-white rounded-2xl font-bold text-lg transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-2"
                 >
                   {t.contact.formSubmit} <Send size={20} />
                 </button>
