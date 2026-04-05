@@ -17,7 +17,7 @@ import { ArrowRight } from 'lucide-react';
 
 export function HeroSection({ t }: { t: any }) {
   return (
-    <section className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-[#0A0A0A]">
+    <section className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-app">
 
       {/* IMAGE pleine et nette — zoom-out au chargement */}
       <div className="absolute inset-0 z-0">
@@ -88,7 +88,7 @@ export function HeroSection({ t }: { t: any }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.25, duration: 0.8 }}
-          className="text-[#D1D5DB] text-base md:text-xl font-light leading-relaxed max-w-xl mx-auto mb-10"
+          className="text-body text-base md:text-xl font-light leading-relaxed max-w-xl mx-auto mb-10"
         >
           {t.home.heroSubtitle}
         </motion.p>

@@ -42,36 +42,36 @@ const Navbar: React.FC = () => {
               A
             </motion.div>
             <div className="flex flex-col">
-              <span className="font-black text-2xl tracking-tighter text-[#1A1A1A] dark:text-[#F5F5F5] leading-none">AMESCAO</span>
-              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#059669]">Aouda, Togo</span>
+              <span className="font-black text-2xl tracking-tighter text-main leading-none">AMESCAO</span>
+              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-primary">Aouda, Togo</span>
             </div>
           </Link>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => (
+              {navItems.map((item) => (
               <Link
                 key={item.path}
                 href={item.path}
                 className={`relative px-5 py-2 text-sm font-black uppercase tracking-widest transition-all duration-300 rounded-xl overflow-hidden group ${
-                  pathname === item.path ? 'text-[#059669]' : 'text-[#6B7280] dark:text-[#9CA3AF] hover:text-[#1A1A1A] dark:hover:text-[#F5F5F5]'
+                  pathname === item.path ? 'text-primary' : 'text-muted hover:text-body'
                 }`}
               >
                 <span className="relative z-10">{item.name}</span>
                 {pathname === item.path && (
                   <motion.div 
                     layoutId="nav-active"
-                    className="absolute inset-0 bg-[#059669]/10 rounded-xl z-0"
+                    className="absolute inset-0 bg-primary/10 rounded-xl z-0"
                   />
                 )}
               </Link>
-            ))}
+              ))}
           </div>
 
           <div className="flex items-center space-x-2">
             {/* Language Selector */}
-            <div className="relative group">
-              <button className="w-10 h-10 rounded-xl hover:bg-[#F9FAFB] dark:hover:bg-[#2A2A2A] transition-all flex items-center justify-center text-[#6B7280] dark:text-[#9CA3AF]">
+              <div className="relative group">
+              <button className="w-10 h-10 rounded-xl hover:bg-secondary transition-all flex items-center justify-center text-muted">
                 <Globe size={20} />
               </button>
               <div className="absolute right-0 mt-2 w-32 bg-[#FFFFFF] dark:bg-[#1A1A1A] rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all border border-[#E5E7EB] dark:border-[#2A2A2A] p-2 z-50">
@@ -79,8 +79,8 @@ const Navbar: React.FC = () => {
                   <button
                     key={lang.code}
                     onClick={() => setLanguage(lang.code)}
-                    className={`w-full text-left px-4 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-[#F9FAFB] dark:hover:bg-[#2A2A2A] transition-all ${
-                      language === lang.code ? 'text-[#059669] bg-[#059669]/5' : 'text-[#6B7280] dark:text-[#9CA3AF]'
+                    className={`w-full text-left px-4 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-secondary transition-all ${
+                      language === lang.code ? 'text-primary bg-primary/5' : 'text-muted'
                     }`}
                   >
                     {lang.label}
@@ -92,7 +92,7 @@ const Navbar: React.FC = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="w-10 h-10 rounded-xl hover:bg-[#F9FAFB] dark:hover:bg-[#2A2A2A] transition-all flex items-center justify-center text-[#6B7280] dark:text-[#9CA3AF]"
+              className="w-10 h-10 rounded-xl hover:bg-secondary transition-all flex items-center justify-center text-muted"
             >
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
@@ -100,7 +100,7 @@ const Navbar: React.FC = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden w-10 h-10 rounded-xl hover:bg-[#F9FAFB] dark:hover:bg-[#2A2A2A] transition-all flex items-center justify-center text-[#6B7280] dark:text-[#9CA3AF]"
+              className="md:hidden w-10 h-10 rounded-xl hover:bg-secondary transition-all flex items-center justify-center text-muted"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -124,10 +124,10 @@ const Navbar: React.FC = () => {
                   href={item.path}
                   onClick={() => setIsOpen(false)}
                   className={`block px-6 py-4 rounded-2xl text-sm font-black uppercase tracking-widest transition-all ${
-                    pathname === item.path
-                      ? 'bg-[#059669] text-[#FFFFFF] shadow-lg shadow-[#059669]/20'
-                      : 'text-[#6B7280] dark:text-[#9CA3AF] hover:bg-[#F9FAFB] dark:hover:bg-[#2A2A2A]'
-                  }`}
+                      pathname === item.path
+                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                        : 'text-muted hover:bg-secondary'
+                    }`}
                 >
                   {item.name}
                 </Link>
