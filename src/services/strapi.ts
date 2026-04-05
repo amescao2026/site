@@ -8,12 +8,15 @@ import {
   StrapiMedia
 } from '../types';
 
-const STRAPI_BASE_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'https://amescaobackend.onrender.com';
+const STRAPI_BASE_URL = (process.env.NEXT_PUBLIC_STRAPI_URL || 'https://amescaobackend.onrender.com').replace(/\/$/, '');
 const API_URL = `${STRAPI_BASE_URL}/api`;
 
 export const getMediaUrl = (media?: StrapiMedia): string => {
   if (!media?.url) return '';
-  return media.url.startsWith('http') ? media.url : `${STRAPI_BASE_URL}${media.url}`;
+  const url = media.url;
+  if (url.startsWith('http') || url.startsWith('//')) return url;
+  const path = url.startsWith('/') ? url : `/${url}`;
+  return `${STRAPI_BASE_URL}${path}`;
 };
 
 export const renderBlocksToText = (blocks: any): string => {
