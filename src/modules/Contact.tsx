@@ -64,7 +64,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold mb-1">Téléphone</h3>
-                    <p className="text-zinc-500">+228 90 00 00 00</p>
+                    <p className="text-zinc-500">+228 92 85 92 00</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-6">

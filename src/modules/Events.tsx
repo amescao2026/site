@@ -51,7 +51,7 @@ export default function Events() {
   );
 
   return (
-    <div className={`min-h-screen ${isDark ? "bg-[#0A0A0A] text-[#F5F5F5]" : "bg-[#FEFEFE] text-[#1A1A1A]"}`}>
+    <div className="min-h-screen bg-app text-body">
       <Navbar />
 
       <section className="pt-32 pb-24 px-4">
@@ -74,17 +74,13 @@ export default function Events() {
               animate={{ opacity: 1, x: 0 }}
               className="relative w-full md:w-80"
             >
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
               <input
                 type="text"
                 placeholder="Rechercher une action..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full pl-12 pr-4 py-3.5 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all text-sm ${
-                  isDark
-                    ? "bg-[#1A1A1A] border-[#2A2A2A] text-[#F5F5F5]"
-                    : "bg-[#FFFFFF] border-[#E5E7EB] text-[#1A1A1A]"
-                }`}
+                className={`w-full pl-12 pr-4 py-3.5 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all text-sm bg-card border-subtle text-body`}
               />
             </motion.div>
           </div>
@@ -95,13 +91,13 @@ export default function Events() {
               {filteredEvents.length} événement{filteredEvents.length > 1 ? "s" : ""}
             </p>
 
-            <div className={`flex items-center p-1 rounded-2xl border ${isDark ? "bg-[#1A1A1A] border-[#2A2A2A]" : "bg-[#FFFFFF] border-[#E5E7EB]"}`}>
+            <div className="flex items-center p-1 rounded-2xl border bg-card border-subtle">
               <button
                 onClick={() => setView("grid")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                   view === "grid"
-                    ? "bg-[#059669] text-[#FFFFFF] shadow-lg"
-                    : isDark ? "text-[#9CA3AF] hover:text-[#F5F5F5]" : "text-[#6B7280] hover:text-[#1A1A1A]"
+                    ? "bg-emerald-600 text-white shadow-lg"
+                    : "text-muted hover:text-body"
                 }`}
               >
                 <LayoutGrid size={15} />
@@ -111,8 +107,8 @@ export default function Events() {
                 onClick={() => setView("timeline")}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                   view === "timeline"
-                    ? "bg-[#059669] text-[#FFFFFF] shadow-lg"
-                    : isDark ? "text-[#9CA3AF] hover:text-[#F5F5F5]" : "text-[#6B7280] hover:text-[#1A1A1A]"
+                    ? "bg-emerald-600 text-white shadow-lg"
+                    : "text-muted hover:text-body"
                 }`}
               >
                 <Clock size={15} />
@@ -136,11 +132,11 @@ export default function Events() {
                 {loading ? (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {[...Array(6)].map((_, i) => (
-                      <div key={i} className={`aspect-[4/3] rounded-2xl animate-pulse ${isDark ? "bg-zinc-800" : "bg-stone-200"}`} />
+                      <div key={i} className={`aspect-[4/3] rounded-2xl animate-pulse bg-card`} />
                     ))}
                   </div>
                 ) : sortedEvents.length === 0 ? (
-                  <p className={`text-center py-24 ${isDark ? "text-zinc-600" : "text-stone-400"}`}>
+                  <p className={`text-center py-24 text-muted`}>
                     Aucun événement trouvé.
                   </p>
                 ) : (

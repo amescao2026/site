@@ -26,18 +26,51 @@ const Timeline: React.FC<TimelineProps> = ({ items }) => {
     restDelta: 0.001
   });
 
-  // Dynamic color based on scroll progress
-  const lineColor = useTransform(
-    scrollYProgress,
-    [0, 0.5, 1],
-    ["#6366f1", "#ec4899", "#f59e0b"] // primary -> secondary -> accent
-  );
+  // Dynamic color based on scroll progress — prefer theme CSS vars when available
+  const getRootVar = (name: string) => {
+    if (typeof window === 'undefined') return '';
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  };
 
-  const glowColor = useTransform(
-    scrollYProgress,
-    [0, 0.5, 1],
-    ["rgba(99, 102, 241, 0.5)", "rgba(236, 72, 153, 0.5)", "rgba(245, 158, 11, 0.5)"]
-  );
+  const hexToRgb = (hex: string) => {
+    if (!hex) return null;
+    hex = hex.replace('#', '').trim();
+    if (hex.length === 3) hex = hex.split('').map((c) => c + c).join('');
+    const int = parseInt(hex, 16);
+    if (Number.isNaN(int)) return null;
+    const r = (int >> 16) & 255;
+    const g = (int >> 8) & 255;
+    const b = int & 255;
+    return `${r}, ${g}, ${b}`;
+  };
+
+  const readColorRgb = (varName: string, fallbackVar: string, fallbackHex: string) => {
+    const val = getRootVar(varName) || getRootVar(fallbackVar);
+    if (!val) return hexToRgb(fallbackHex);
+    // val may be rgb(...) or a hex string
+    if (val.startsWith('rgb')) {
+      // extract numbers
+      const nums = val.replace(/[^0-9,]/g, '');
+      return nums;
+    }
+    if (val.startsWith('#')) return hexToRgb(val);
+    return hexToRgb(fallbackHex);
+  };
+
+  const primaryRgb = readColorRgb('--color-primary', '--color-primary', '');
+  const secondaryRgb = readColorRgb('--color-secondary', '--color-secondary', '');
+  const accentRgb = readColorRgb('--color-accent', '--color-accent', '');
+
+  const primaryColor = primaryRgb ? `rgb(${primaryRgb})` : 'var(--color-primary)';
+  const secondaryColor = secondaryRgb ? `rgb(${secondaryRgb})` : 'var(--color-secondary)';
+  const accentColor = accentRgb ? `rgb(${accentRgb})` : 'var(--color-accent)';
+
+  const primaryGlow = primaryRgb ? `rgba(${primaryRgb}, 0.5)` : 'rgba(99,102,241,0.5)';
+  const secondaryGlow = secondaryRgb ? `rgba(${secondaryRgb}, 0.5)` : 'rgba(236,72,153,0.5)';
+  const accentGlow = accentRgb ? `rgba(${accentRgb}, 0.5)` : 'rgba(245,158,11,0.5)';
+
+  const lineColor = useTransform(scrollYProgress, [0, 0.5, 1], [primaryColor, secondaryColor, accentColor]);
+  const glowColor = useTransform(scrollYProgress, [0, 0.5, 1], [primaryGlow, secondaryGlow, accentGlow]);
 
   return (
     <div ref={containerRef} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">

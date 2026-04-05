@@ -16,7 +16,7 @@ export default function Support() {
 
   return (
     <div
-      className={`${isDark ? "bg-[#0A0A0A] text-[#F5F5F5]" : "bg-[#FEFEFE] text-[#1A1A1A]"} min-h-screen`}
+      className={`min-h-screen bg-app text-main`}
     >
       <Navbar />
 
@@ -59,7 +59,7 @@ export default function Support() {
             whileHover={{ scale: 1.04 }}
             transition={{ type: "spring", stiffness: 300 }}
             className={`relative h-[450px] flex flex-col rounded-3xl overflow-hidden border shadow-xl
-        ${isDark ? "bg-[#1A1A1A] border-[#2A2A2A]" : "bg-[#FFFFFF] border-[#E5E7EB]"}`}
+        card border-subtle`}
           >
             {/* Image: 2/3 */}
             <div className="relative h-2/3 w-full p-8">
@@ -93,7 +93,7 @@ export default function Support() {
             whileHover={{ scale: 1.04 }}
             transition={{ type: "spring", stiffness: 300 }}
             className={`relative h-[450px] flex flex-col rounded-3xl overflow-hidden border shadow-xl
-        ${isDark ? "bg-[#1A1A1A] border-[#2A2A2A]" : "bg-[#FFFFFF] border-[#E5E7EB]"}`}
+        card border-subtle`}
           >
             {/* Image: 2/3 */}
             <div className="relative h-2/3 w-full p-8">

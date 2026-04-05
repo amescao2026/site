@@ -74,7 +74,7 @@ const Navbar: React.FC = () => {
               <button className="w-10 h-10 rounded-xl hover:bg-secondary transition-all flex items-center justify-center text-muted">
                 <Globe size={20} />
               </button>
-              <div className="absolute right-0 mt-2 w-32 bg-[#FFFFFF] dark:bg-[#1A1A1A] rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all border border-[#E5E7EB] dark:border-[#2A2A2A] p-2 z-50">
+              <div className="absolute right-0 mt-2 w-32 bg-card rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all border border-subtle p-2 z-50">
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
@@ -109,13 +109,13 @@ const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
+            <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="md:hidden glass border-t border-[#E5E7EB] dark:border-[#2A2A2A] overflow-hidden"
+            className="md:hidden glass border-t border-subtle overflow-hidden"
           >
             <div className="px-4 pt-4 pb-8 space-y-2">
               {navItems.map((item) => (

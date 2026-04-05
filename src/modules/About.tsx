@@ -42,7 +42,7 @@ export default function About() {
   ];
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-[#0A0A0A] text-[#F5F5F5]' : 'bg-[#FEFEFE] text-[#1A1A1A]'}`}>
+    <div className="min-h-screen bg-app text-body">
       <Navbar />
       
       <section className="pt-32 pb-24 px-4">
@@ -69,7 +69,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="py-24 px-4 bg-[#F9FAFB] dark:bg-[#141414]/50">
+      <section className="py-24 px-4 bg-app">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {sections.map((section, idx) => (
             <motion.div
@@ -78,13 +78,13 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              className="p-8 bg-[#FFFFFF] dark:bg-[#1A1A1A] rounded-2xl shadow-xl shadow-black/5"
+              className="p-8 bg-card rounded-2xl shadow-xl shadow-black/5"
             >
               <div className="mb-6 p-3 bg-emerald-600/10 rounded-xl w-fit">
                 {section.icon}
               </div>
               <h3 className="text-xl font-bold mb-4">{section.title}</h3>
-              <p className="text-[#6B7280] text-sm leading-relaxed">
+              <p className="text-muted text-sm leading-relaxed">
                 {section.content}
               </p>
             </motion.div>

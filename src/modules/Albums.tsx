@@ -324,7 +324,7 @@ export default function Albums() {
      RENDER
   ──────────────────────────────────────────────────────────────────────── */
   return (
-    <div className={`min-h-screen ${isDark ? "bg-[#0A0A0A] text-[#F5F5F5]" : "bg-[#FEFEFE] text-[#1A1A1A]"}`}>
+    <div className="min-h-screen bg-app text-body">
       <Navbar />
 
       {/* ══════════════════════════════════════════════════════════════
@@ -349,18 +349,14 @@ export default function Albums() {
             ══════════════════════════════════════════════════════════ */}
         <div className="w-20 flex-shrink-0 relative hidden md:block">
           {/* Trait vertical de fond */}
-          <div
-            className={`absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] rounded-full ${
-              isDark ? 'bg-zinc-800' : 'bg-stone-200'
-            }`}
-          />
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] rounded-full bg-card" />
 
           {/* Trait de progression coloré */}
           <motion.div
             className="absolute left-1/2 -translate-x-1/2 top-0 w-[2px] rounded-full origin-top"
             style={{
               height: `${pinProgress * 100}%`,
-              background: `linear-gradient(to bottom, #10b981, ${trailColor})`,
+              background: `linear-gradient(to bottom, var(--color-primary), ${trailColor})`,
               boxShadow: `0 0 8px 1px ${trailColor}55`,
             }}
           />
@@ -405,9 +401,7 @@ export default function Albums() {
               {[...Array(9)].map((_, i) => (
                 <div
                   key={i}
-                  className={`aspect-square rounded-2xl animate-pulse ${
-                    isDark ? 'bg-zinc-800' : 'bg-stone-200'
-                  }`}
+                  className={`aspect-square rounded-2xl animate-pulse bg-card`}
                 />
               ))}
             </div>
@@ -443,14 +437,12 @@ export default function Albums() {
                     className="flex items-start md:items-center flex-col md:flex-row gap-3 mb-6"
                   >
                     {/* Dot sur la timeline */}
-                    <div
-                      className={`hidden md:block w-3 h-3 rounded-full ring-4 flex-shrink-0 -ml-[2.35rem] ${
-                        isDark ? 'ring-[#18181b]' : 'ring-[#fafaf9]'
-                      }`}
-                      style={{
-                        background: activeYear === album.year ? trailColor : isDark ? '#3f3f46' : '#d4d4c8',  // Changed from 'activeDate === album.date' to 'activeYear === album.year'
-                      }}
-                    />
+                      <div
+                        className={`hidden md:block w-3 h-3 rounded-full ring-4 flex-shrink-0 -ml-[2.35rem] ring-subtle`}
+                        style={{
+                          background: activeYear === album.year ? trailColor : 'var(--bg-card)',
+                        }}
+                      />
 
                    
                     <div className="flex-1">
@@ -484,7 +476,7 @@ export default function Albums() {
                     </div>
 
                     {/* Ligne de séparation */}
-                    <div className={`h-px flex-1 hidden lg:block ${isDark ? 'bg-zinc-800' : 'bg-stone-200'}`} />
+                    <div className="h-px flex-1 hidden lg:block bg-card" />
                   </motion.div>
 
                   {/* ════════════════════════════════════════════════

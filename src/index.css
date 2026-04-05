@@ -2,8 +2,11 @@
 
 @theme {
   --color-primary: #6366f1; /* Indigo 500 */
+  --color-primary-rgb: 99, 102, 241;
   --color-secondary: #f43f5e; /* Rose 500 */
+  --color-secondary-rgb: 244, 63, 94;
   --color-accent: #fbbf24; /* Amber 400 */
+  --color-accent-rgb: 251, 191, 36;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", sans-serif;
 }
@@ -15,6 +18,11 @@
   --bg-card: #ffffff;
   --text-main: #0f172a;
   --text-muted: #64748b;
+  --color-primary-rgb: 99, 102, 241;
+  --color-secondary-rgb: 244, 63, 94;
+  --color-accent-rgb: 251, 191, 36;
+  --scroll-thumb: #cbd5e1;
+  --scroll-thumb-hover: #94a3b8;
   --border-subtle: rgba(0, 0, 0, 0.05);
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.4);
@@ -25,6 +33,10 @@
   --bg-card: #0f172a;
   --text-main: #f1f5f9;
   --text-muted: #94a3b8;
+  --color-primary-rgb: 99, 102, 241;
+  --color-secondary-rgb: 244, 63, 94;
+  --color-accent-rgb: 251, 191, 36;
+  --scroll-thumb-dark: #334155;
   --border-subtle: rgba(255, 255, 255, 0.05);
   --glass-bg: rgba(15, 23, 42, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
@@ -82,16 +94,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--scroll-thumb);
   border-radius: 10px;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: var(--scroll-thumb-dark);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--scroll-thumb-hover);
 }
 
 /* Animations */

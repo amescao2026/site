@@ -207,3 +207,8 @@ input:focus, textarea:focus, select:focus {
 .border-subtle { border-color: var(--border-subtle); }
 .text-primary { color: var(--color-primary); }
 .bg-primary { background-color: var(--color-primary); }
+
+/* ring using subtle border color */
+.ring-subtle {
+  box-shadow: 0 0 0 1px var(--border-subtle) !important;
+}

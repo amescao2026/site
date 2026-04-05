@@ -55,7 +55,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
             transition={{ type: 'spring', damping: 28, stiffness: 260 }}
             onClick={(e) => e.stopPropagation()}
             className={`relative w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl ${
-              isDark ? 'bg-[#1A1A1A]' : 'bg-[#FFFFFF]'
+              'card'
             }`}
           >
 
@@ -71,23 +71,19 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
                   priority
                 />
               ) : (
-                <div className={`w-full h-full flex items-center justify-center ${isDark ? 'bg-zinc-800' : 'bg-stone-100'}`}>
+                <div className={`w-full h-full flex items-center justify-center bg-card`}>
                   <Calendar size={48} className="opacity-20" />
                 </div>
               )}
               {/* Fondu bas sur l'image */}
-              <div className={`absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t ${isDark ? 'from-zinc-900' : 'from-white'} to-transparent`} />
+              <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-card to-transparent" />
             </div>
 
             {/* Bouton fermer — toujours visible */}
             <button
               onClick={onClose}
                 aria-label={t.events.close}
-              className={`absolute top-4 right-4 z-20 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 ${
-                isDark
-                  ? 'bg-[#2A2A2A] text-[#9CA3AF] hover:bg-[#374151]'
-                  : 'bg-[#FFFFFF] text-[#6B7280] hover:bg-[#F9FAFB]'
-              }`}
+              className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 bg-card text-muted hover:bg-secondary"
             >
               <X size={18} />
             </button>
@@ -97,12 +93,12 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
 
               {/* Meta : date + lieu */}
               <div className="flex flex-wrap items-center gap-4 mb-4">
-                <span className={`flex items-center gap-1.5 text-xs font-semibold ${isDark ? 'text-[#9CA3AF]' : 'text-[#6B7280]'}`}>
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-muted">
                   <Calendar size={13} className="text-emerald-500" />
                   {new Date(event.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </span>
                 {event.location && (
-                  <span className={`flex items-center gap-1.5 text-xs font-semibold ${isDark ? 'text-[#9CA3AF]' : 'text-[#6B7280]'}`}>
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-muted">
                     <MapPin size={13} className="text-emerald-500" />
                     {event.location}
                   </span>
@@ -110,7 +106,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
               </div>
 
               {/* Titre */}
-              <h2 className={`text-2xl sm:text-3xl font-black tracking-tight leading-tight mb-5 ${isDark ? 'text-[#F5F5F5]' : 'text-[#1A1A1A]'}`}>
+              <h2 className={`text-2xl sm:text-3xl font-black tracking-tight leading-tight mb-5 text-main`}>
                 {event.title}
               </h2>
 
@@ -118,14 +114,14 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
               <div className="w-10 h-[3px] bg-emerald-500 rounded-full mb-5" />
 
               {/* Contenu texte — hauteur naturelle, pas de scroll interne */}
-              <p className={`text-base leading-relaxed text-justify ${isDark ? 'text-[#D1D5DB]' : 'text-[#374151]'}`}>
+              <p className="text-base leading-relaxed text-justify text-body">
                 {renderBlocksToText(event.content)}
               </p>
 
               {/* Footer */}
-              <div className={`mt-8 pt-6 border-t flex items-center justify-between gap-4 ${isDark ? 'border-[#2A2A2A]' : 'border-[#E5E7EB]'}`}>
+              <div className="mt-8 pt-6 border-t flex items-center justify-between gap-4 border-subtle">
                 <button
-                  className={`p-3 rounded-2xl transition-all hover:scale-105 ${isDark ? 'bg-[#2A2A2A] text-[#D1D5DB] hover:bg-[#374151]' : 'bg-[#F9FAFB] text-[#374151] hover:bg-[#E5E7EB]'}`}
+                  className="p-3 rounded-2xl transition-all hover:scale-105 bg-card text-body hover:bg-card/80"
                   aria-label="Partager"
                 >
                   <Share2 size={18} />

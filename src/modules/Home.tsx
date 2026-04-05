@@ -93,11 +93,9 @@ export default function Home() {
   const SidebarContent = () => (
     <div className="flex flex-col gap-5">
       {/* ── Bloc Bureau ── */}
-      <div className={`rounded-3xl border overflow-hidden ${
-        isDark ? 'bg-[#1A1A1A] border-[#2A2A2A]' : 'bg-[#FFFFFF] border-[#E5E7EB] shadow-sm'
-      }`}>
+      <div className="rounded-3xl border overflow-hidden bg-card border-subtle shadow-sm">
         {/* Header */}
-        <div className={`flex items-center gap-2 px-5 py-4 border-b ${isDark ? 'border-[#2A2A2A]' : 'border-[#E5E7EB]'}`}>
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-subtle">
           <Users size={14} className="text-emerald-600" />
           <p className="text-[11px] font-black uppercase tracking-[0.25em] text-emerald-600">Bureau</p>
         </div>
@@ -106,10 +104,10 @@ export default function Home() {
         <div className={`${PANEL_MAX_H} overflow-y-auto py-2 px-2`} style={{ scrollbarWidth: 'none' }}>
           {loading
             ? [...Array(4)].map((_, i) => (
-                <div key={i} className={`h-14 rounded-2xl mb-1.5 animate-pulse ${isDark ? 'bg-[#2A2A2A]' : 'bg-[#F9FAFB]'}`} />
+                <div key={i} className={`h-14 rounded-2xl mb-1.5 animate-pulse bg-card`} />
               ))
             : boardMembers.length === 0
-            ? <p className={`text-center text-xs py-8 ${isDark ? 'text-[#9CA3AF]' : 'text-[#6B7280]'}`}>Aucun membre</p>
+            ? <p className={`text-center text-xs py-8 text-muted`}>Aucun membre</p>
             : boardMembers.map((member, idx) => (
                 <div key={member.id}>
                   <motion.button
@@ -120,13 +118,13 @@ export default function Home() {
                     className={`w-full flex items-center gap-3 p-2.5 rounded-2xl text-left transition-all ${
                       expandedMember === member.id
                         ? isDark ? 'bg-emerald-950/60 ring-1 ring-emerald-700/40' : 'bg-emerald-50 ring-1 ring-emerald-200'
-                        : isDark ? 'hover:bg-[#2A2A2A]/70' : 'hover:bg-[#F9FAFB]'
+                        : 'hover:bg-card/80'
                     }`}
                   >
                     {/* Photo cercle */}
                     <div className="relative w-10 h-10 flex-shrink-0">
                       <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ${
-                        expandedMember === member.id ? 'ring-emerald-500' : isDark ? 'ring-[#2A2A2A]' : 'ring-[#E5E7EB]'
+                        expandedMember === member.id ? 'ring-emerald-500' : 'ring-subtle'
                       }`}>
                         {getMediaUrl(member.photo) ? (
                           <Image
@@ -261,7 +259,7 @@ export default function Home() {
   );
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-[#0A0A0A] text-[#F5F5F5]' : 'bg-[#FEFEFE] text-[#1A1A1A]'}`}>
+    <div className="min-h-screen bg-app text-body">
       <Navbar />
 
       {/* ══════════════════════════════════════════════════════════════
@@ -272,14 +270,12 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════════════
           STATS BAND - Responsive avec scroll horizontal sur mobile
           ══════════════════════════════════════════════════════════════ */}
-      <section className={`py-6 md:py-10 px-4 md:px-8 border-y ${
-        isDark ? 'bg-[#141414] border-[#2A2A2A]' : 'bg-[#FFFFFF] border-[#E5E7EB]'
-      }`}>
+      <section className="py-6 md:py-10 px-4 md:px-8 border-y bg-app border-subtle">
         <div className="flex flex-wrap justify-center md:justify-start gap-8 md:gap-16 max-w-6xl mx-auto">
           {[['10+', 'Actions Annuelles'], ['500+', 'Jeunes Soutenus'], ['25+', "Années d'impact"]].map(([val, label]) => (
             <div key={label} className="text-center md:text-left">
               <p className="text-2xl md:text-3xl font-bold text-emerald-600 tracking-tight">{val}</p>
-              <p className={`text-[10px] uppercase tracking-widest mt-1 ${isDark ? 'text-[#9CA3AF]' : 'text-[#6B7280]'}`}>
+              <p className="text-[10px] uppercase tracking-widest mt-1 text-muted">
                 {label}
               </p>
             </div>
@@ -320,23 +316,18 @@ export default function Home() {
             />
 
             {/* Sidebar Panel */}
-            <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className={`fixed top-0 left-0 h-full w-[85vw] max-w-[340px] z-50 overflow-y-auto lg:hidden ${
-                isDark ? 'bg-[#0A0A0A]' : 'bg-[#FEFEFE]'
-              }`}
+              <motion.div
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className={`fixed top-0 left-0 h-full w-[85vw] max-w-[340px] z-50 overflow-y-auto lg:hidden bg-app`}
               style={{ scrollbarWidth: 'none' }}
             >
               {/* Header avec bouton fermer */}
-              <div className={`sticky top-0 z-10 flex items-center justify-between px-4 py-4 border-b ${
-                isDark ? 'bg-[#0A0A0A] border-[#2A2A2A]' : 'bg-[#FEFEFE] border-[#E5E7EB]'
-              }`}>
+              <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-4 border-b bg-app border-subtle">
                 <h3 className="font-bold text-lg">Informations</h3>
                 <button
-                  onClick={() => setShowMobileSidebar(false)}
                   className={`p-2 rounded-xl transition-colors ${
                     isDark ? 'hover:bg-zinc-800' : 'hover:bg-stone-100'
                   }`}
