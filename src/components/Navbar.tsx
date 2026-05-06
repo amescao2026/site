@@ -1,19 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from './LanguageContext';
 import { useTheme } from './ThemeContext';
 import { Sun, Moon, Globe, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Language } from '../types';
+import { Language, UserProfile } from '../types';
+import ProfileModal from './ProfileModal';
+import { getCurrentUserProfile, getMediaUrl } from '../services/supabase';
 
 const Navbar: React.FC = () => {
   const { t, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
   const pathname = usePathname();
+
+  // Charger le profil de l'utilisateur au montage
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userProfile = await getCurrentUserProfile();
+        setProfile(userProfile);
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const navItems = [
     { name: t.nav.home, path: '/' },
@@ -97,6 +117,27 @@ const Navbar: React.FC = () => {
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
 
+            {/* Profile Circle */}
+            {!loadingProfile && profile && (
+              <button
+                onClick={() => setIsProfileOpen(true)}
+                className="w-10 h-10 rounded-full flex items-center justify-center border-2 border-accent hover:border-accent-dark transition-all overflow-hidden"
+                title={`${profile.name} ${profile.surname}`}
+              >
+                {profile.photo ? (
+                  <img
+                    src={getMediaUrl(profile.photo)}
+                    alt={`${profile.name} ${profile.surname}`}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-accent to-accent-light flex items-center justify-center text-white text-xs font-bold">
+                    {profile.name?.charAt(0)}{profile.surname?.charAt(0)}
+                  </div>
+                )}
+              </button>
+            )}
+
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -117,7 +158,40 @@ const Navbar: React.FC = () => {
             exit={{ opacity: 0, y: -20 }}
             className="md:hidden glass border-t border-subtle overflow-hidden"
           >
-            <div className="px-4 pt-4 pb-8 space-y-2">
+            <div className="px-4 pt-4 pb-8 space-y-4">
+              {/* Mobile Profile Section */}
+              {!loadingProfile && profile && (
+                <div className="flex items-center gap-4 pb-4 border-b border-subtle">
+                  <button
+                    onClick={() => {
+                      setIsProfileOpen(true);
+                      setIsOpen(false);
+                    }}
+                    className="w-16 h-16 rounded-full flex items-center justify-center border-2 border-accent hover:border-accent-dark transition-all overflow-hidden flex-shrink-0"
+                    title={`${profile.name} ${profile.surname}`}
+                  >
+                    {profile.photo ? (
+                      <img
+                        src={getMediaUrl(profile.photo)}
+                        alt={`${profile.name} ${profile.surname}`}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-accent to-accent-light flex items-center justify-center text-white text-sm font-bold">
+                        {profile.name?.charAt(0)}{profile.surname?.charAt(0)}
+                      </div>
+                    )}
+                  </button>
+                  <div className="flex-1">
+                    <p className="font-black text-heading">
+                      {profile.name} {profile.surname}
+                    </p>
+                    <p className="text-xs text-muted">{profile.email}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation Items */}
               {navItems.map((item) => (
                 <Link
                   key={item.path}
@@ -136,6 +210,9 @@ const Navbar: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Profile Modal */}
+      <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
     </nav>
   );
 };

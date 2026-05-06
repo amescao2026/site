@@ -7,7 +7,7 @@ import { X, Calendar, MapPin, Share2 } from 'lucide-react';
 import { EventData } from '../types';
 import { useLanguage } from './LanguageContext';
 import { useTheme } from './ThemeContext';
-import { getMediaUrl, renderBlocksToText } from '../services/strapi';
+import { getMediaUrl, renderBlocksToText } from '../services/supabase';
 
 interface EventModalProps {
   event: EventData | null;
@@ -61,9 +61,9 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
 
             {/* ── IMAGE EN HAUT ── */}
             <div className="relative w-full h-56 sm:h-72 overflow-hidden">
-              {getMediaUrl(event.main_photo) ? (
+              {getMediaUrl(event.main_photo?.url) ? (
                 <Image
-                  src={getMediaUrl(event.main_photo)}
+                  src={getMediaUrl(event.main_photo?.url)}
                   alt={event.title}
                   fill
                   sizes="100vw"

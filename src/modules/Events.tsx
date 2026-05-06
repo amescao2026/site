@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getEvents, getMediaUrl, renderBlocksToText } from "../services/strapi";
+import { getEvents, getMediaUrl, renderBlocksToText } from "../services/supabase";
 import { EventData, translations } from "../types";
 import { useLanguage } from "../components/LanguageContext";
 import { useTheme } from "../components/ThemeContext";
@@ -142,7 +142,7 @@ export default function Events() {
                 ) : (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {sortedEvents.map((event, idx) => {
-                      const imageUrl = getMediaUrl(event.main_photo);
+                      const imageUrl = getMediaUrl(event.main_photo?.url);
                       return (
                         <motion.div
                           key={event.id}
@@ -214,10 +214,10 @@ export default function Events() {
                     title: event.title,
                     content: (
                       <div className="space-y-4">
-                        {getMediaUrl(event.main_photo) && (
+                        {getMediaUrl(event.main_photo?.url) && (
                           <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
                             <Image
-                              src={getMediaUrl(event.main_photo)}
+                              src={getMediaUrl(event.main_photo?.url)}
                               alt={event.title}
                               fill
                               sizes="(max-width: 768px) 100vw, 50vw"

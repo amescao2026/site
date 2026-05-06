@@ -8,7 +8,7 @@ import {
   getBoardMembers, 
   getMediaUrl, 
   renderBlocksToText 
-} from '../services/strapi';
+} from '../services/supabase';
 import { EventData, ReportData, BoardMemberData, translations, Language } from '../types';
 import { useLanguage } from '../components/LanguageContext';
 import { useTheme } from '../components/ThemeContext';
@@ -126,9 +126,9 @@ export default function Home() {
                       <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ${
                         expandedMember === member.id ? 'ring-emerald-500' : 'ring-subtle'
                       }`}>
-                        {getMediaUrl(member.photo) ? (
+                        {getMediaUrl(member.photo?.url) ? (
                           <Image
-                            src={getMediaUrl(member.photo)}
+                            src={getMediaUrl(member.photo?.url)}
                             alt={`${member.name} ${member.surname || ''}`}
                             width={40}
                             height={40}
@@ -231,7 +231,7 @@ export default function Home() {
                       )}
                       <div className="flex gap-1.5">
                         <a
-                          href={getMediaUrl(report.file)}
+                          href={getMediaUrl(report.file?.url)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-500 transition-colors"
@@ -239,7 +239,7 @@ export default function Home() {
                           <ExternalLink size={9} /> Lire
                         </a>
                         <a
-                          href={getMediaUrl(report.file)}
+                          href={getMediaUrl(report.file?.url)}
                           download
                           className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors ${
                             isDark ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600' : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
@@ -458,9 +458,9 @@ export default function Home() {
                     >
                       {/* Image principale */}
                       <div className="relative w-full aspect-[4/3] overflow-hidden">
-                        {getMediaUrl(event.main_photo) ? (
+                        {getMediaUrl(event.main_photo?.url) ? (
                           <Image
-                            src={getMediaUrl(event.main_photo)}
+                            src={getMediaUrl(event.main_photo?.url)}
                             alt={event.title}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

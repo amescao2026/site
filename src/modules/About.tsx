@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { getAbout, renderBlocksToText } from '../services/strapi';
+import { getAbout, renderBlocksToText } from '../services/supabase';
 import { AboutData, translations, Language } from '../types';
 import { useLanguage } from '../components/LanguageContext';
 import { useTheme } from '../components/ThemeContext';

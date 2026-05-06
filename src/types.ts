@@ -50,6 +50,15 @@ export interface AboutData {
   text?: any;
 }
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  surname: string;
+  email: string;
+  photo?: string;
+  role: string;
+}
+
 export type Language = 'fr' | 'en' | 'de';
 
 export interface Event {

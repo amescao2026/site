@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { getAlbums, getMediaUrl } from '../services/strapi';
+import { getAlbums, getMediaUrl } from '../services/supabase';
 import { AlbumData, translations } from '../types';
 import { useLanguage } from '../components/LanguageContext';
 import { useTheme } from '../components/ThemeContext';
@@ -100,7 +100,7 @@ function PhotoViewer({
             className="relative w-full h-full"
           >
             <Image
-              src={getMediaUrl(photos[idx])}
+              src={getMediaUrl(photos[idx].url)}
               alt={photos[idx].name || `photo-${idx}`}
               fill
                 sizes="100vw"
@@ -144,7 +144,7 @@ function PhotoViewer({
               }`}
             >
               <Image
-                src={getMediaUrl(p)}
+                src={getMediaUrl(p.url)}
                 alt=""
                 fill
                     sizes="56px"
@@ -493,9 +493,9 @@ export default function Albums() {
                         onClick={() => openViewer(album.photos, pIdx, album.title, album.year)}  
                         className="group relative aspect-square rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-0.5"
                       >
-                        {getMediaUrl(photo) ? (
+                        {getMediaUrl(photo.url) ? (
                           <Image
-                            src={getMediaUrl(photo)}
+                            src={getMediaUrl(photo.url)}
                             alt={photo.name || `${album.title}-${pIdx}`}
                             fill
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
@@ -537,9 +537,9 @@ export default function Albums() {
                         <div className="grid grid-cols-2 gap-1 w-14 h-14 rounded-xl overflow-hidden opacity-50 group-hover:opacity-80 transition-opacity">
                           {album.photos.slice(LIMIT, LIMIT + 4).map((p, i) => (
                             <div key={i} className="relative w-full h-full">
-                              {getMediaUrl(p) && (
+                              {getMediaUrl(p.url) && (
                                 <Image
-                                  src={getMediaUrl(p)}
+                                  src={getMediaUrl(p.url)}
                                   alt=""
                                   fill
                                   className="object-cover"
