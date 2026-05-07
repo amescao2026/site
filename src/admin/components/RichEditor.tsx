@@ -1,11 +1,19 @@
+// RichEditor.tsx
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import { Bold, Italic, Underline, Heading1, Heading2, List } from 'lucide-react';
+import React, { useEffect, useRef, useCallback } from 'react';
+import { Bold, Italic, Underline, Heading1, Heading2, List, LucideIcon } from 'lucide-react';
 
 interface RichEditorProps {
   content: string;
   setContent: (content: string) => void;
+}
+
+interface ToolbarButtonProps {
+  onClick: () => void;
+  icon: LucideIcon;
+  title: string;
+  isActive?: boolean;
 }
 
 /**
@@ -13,37 +21,53 @@ interface RichEditorProps {
  */
 export default function RichEditor({ content, setContent }: RichEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const isUpdatingRef = useRef(false);
 
+  // Synchroniser le contenu externe vers l'éditeur
   useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== content) {
-      editorRef.current.innerHTML = content || '';
+    if (editorRef.current && !isUpdatingRef.current) {
+      // Ne mettre à jour que si différent pour éviter le curseur qui saute
+      const currentHtml = editorRef.current.innerHTML;
+      const newContent = content || '';
+      if (currentHtml !== newContent) {
+        editorRef.current.innerHTML = newContent;
+      }
     }
   }, [content]);
 
-  const execCommand = (command: string, value: string | undefined = undefined) => {
+  const execCommand = useCallback((command: string, value: string | undefined = undefined) => {
     document.execCommand(command, false, value);
     editorRef.current?.focus();
-    if (editorRef.current) setContent(editorRef.current.innerHTML);
-  };
+    if (editorRef.current) {
+      isUpdatingRef.current = true;
+      setContent(editorRef.current.innerHTML);
+      // Reset le flag après le prochain render
+      requestAnimationFrame(() => {
+        isUpdatingRef.current = false;
+      });
+    }
+  }, [setContent]);
 
-  const handleInput = () => {
-    if (editorRef.current) setContent(editorRef.current.innerHTML);
-  };
+  const handleInput = useCallback(() => {
+    if (editorRef.current) {
+      isUpdatingRef.current = true;
+      setContent(editorRef.current.innerHTML);
+      requestAnimationFrame(() => {
+        isUpdatingRef.current = false;
+      });
+    }
+  }, [setContent]);
 
-  const ToolbarButton = ({ 
-    onClick, 
-    icon: Icon, 
-    title 
-  }: { 
-    onClick: () => void
-    icon: any
-    title: string 
-  }) => (
+  const ToolbarButton = ({ onClick, icon: Icon, title, isActive }: ToolbarButtonProps) => (
     <button
       type="button"
       onClick={onClick}
       title={title}
-      className="p-2 text-gray-600 hover:bg-gray-100 rounded transition-colors"
+      className={`p-2 rounded transition-colors ${
+        isActive 
+          ? 'bg-blue-100 text-blue-700' 
+          : 'text-gray-600 hover:bg-gray-100'
+      }`}
     >
       <Icon size={18} />
     </button>
@@ -67,6 +91,8 @@ export default function RichEditor({ content, setContent }: RichEditorProps) {
         onInput={handleInput}
         className="p-4 min-h-[200px] outline-none prose max-w-none"
         style={{ whiteSpace: 'pre-wrap' }}
+        role="textbox"
+        aria-multiline="true"
       />
     </div>
   );

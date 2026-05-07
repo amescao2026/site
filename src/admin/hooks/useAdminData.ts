@@ -1,81 +1,93 @@
-import { useState, useEffect } from 'react';
+// useAdminData.ts
+import { useState, useEffect, useCallback } from 'react';
 import { getAll, insertItem, updateItem, deleteItem } from '../config/database';
+import { TableName, DatabaseItem } from '../types';
+
+interface UseAdminDataReturn {
+  data: DatabaseItem[];
+  isLoading: boolean;
+  error: string | null;
+  loadData: () => Promise<void>;
+  onSave: (item: DatabaseItem) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+}
 
 /**
  * Hook personnalisé pour gérer les données du tableau de bord admin
+ * Gère le chargement, l'insertion, la mise à jour et la suppression des données
  */
-export function useAdminData(activeTable: string) {
-  const [data, setData] = useState<Record<string, any>>({});
-  const [isLoadingData, setIsLoadingData] = useState(false);
+export function useAdminData(activeTable: TableName): UseAdminDataReturn {
+  const [data, setData] = useState<DatabaseItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Charger les données de la table active
-  const loadData = async () => {
-    setIsLoadingData(true);
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
     try {
+      console.log(`[useAdminData] 📡 Loading data from table: ${activeTable}`);
       const fetchedData = await getAll(activeTable);
-      setData(prev => ({ ...prev, [activeTable]: fetchedData }));
-    } catch (error) {
-      console.error(`[useAdminData] Erreur de chargement pour ${activeTable}:`, error);
+      console.log(`[useAdminData] ✅ Loaded ${fetchedData.length} items from ${activeTable}`, fetchedData);
+      setData(fetchedData);
+    } catch (err: any) {
+      const errorMsg = err?.message || 'Erreur de chargement des données';
+      console.error(`[useAdminData] ❌ Error loading ${activeTable}:`, err);
+      setError(errorMsg);
+      setData([]);
     } finally {
-      setIsLoadingData(false);
+      setIsLoading(false);
     }
-  };
+  }, [activeTable]);
 
   // Recharger quand la table active change
   useEffect(() => {
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTable]);
+  }, [loadData]);
 
-  // Ajouter un nouvel élément
-  const handleAddNew = async (payload: Record<string, any>) => {
+  // Ajouter ou mettre à jour un élément
+  const onSave = useCallback(async (item: DatabaseItem) => {
     try {
-      await insertItem(activeTable, payload);
+      if (item.id) {
+        // Mettre à jour
+        console.log(`[useAdminData] ✏️ Updating item in ${activeTable}:`, item);
+        await updateItem(activeTable, item.id, item);
+      } else {
+        // Créer - l'ID sera généré par Supabase
+        console.log(`[useAdminData] ➕ Creating new item in ${activeTable}:`, item);
+        await insertItem(activeTable, item);
+      }
+      // Recharger les données après succès
       await loadData();
-    } catch (error) {
-      console.error('[useAdminData] Erreur lors de l\'ajout:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('[useAdminData] ❌ Error saving:', error);
+      throw new Error(error?.message || 'Erreur lors de la sauvegarde');
     }
-  };
-
-  // Mettre à jour un élément
-  const handleUpdate = async (id: string, payload: Record<string, any>) => {
-    try {
-      await updateItem(activeTable, id, payload);
-      await loadData();
-    } catch (error) {
-      console.error('[useAdminData] Erreur lors de la mise à jour:', error);
-      throw error;
-    }
-  };
+  }, [activeTable, loadData]);
 
   // Supprimer un élément
-  const handleDelete = async (id: string) => {
+  const onDelete = useCallback(async (id: string) => {
+    if (!id) {
+      throw new Error('ID manquant pour la suppression');
+    }
+    
     try {
+      console.log(`[useAdminData] 🗑️ Deleting item ${id} from ${activeTable}`);
       await deleteItem(activeTable, id);
+      // Recharger les données après succès
       await loadData();
-    } catch (error) {
-      console.error('[useAdminData] Erreur lors de la suppression:', error);
-      throw error;
+    } catch (error: any) {
+      console.error('[useAdminData] ❌ Error deleting:', error);
+      throw new Error(error?.message || 'Erreur lors de la suppression');
     }
-  };
-
-  // Sauvegarder (créer ou mettre à jour)
-  const handleSave = async (item: Record<string, any>) => {
-    if (item.id) {
-      await handleUpdate(item.id, item);
-    } else {
-      await handleAddNew(item);
-    }
-  };
-
-  const currentTableData = data[activeTable] || [];
+  }, [activeTable, loadData]);
 
   return {
-    data: currentTableData,
-    isLoading: isLoadingData,
+    data,
+    isLoading,
+    error,
     loadData,
-    onSave: handleSave,
-    onDelete: handleDelete
+    onSave,
+    onDelete
   };
 }

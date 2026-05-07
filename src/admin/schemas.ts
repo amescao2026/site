@@ -1,3 +1,4 @@
+// schemas.ts
 import { TableSchemaMap } from './types';
 
 export const TABLE_SCHEMAS: TableSchemaMap = {
@@ -30,6 +31,7 @@ export const TABLE_SCHEMAS: TableSchemaMap = {
     { key: 'content', label: 'Contenu / Résumé', type: 'rich_text' }
   ],
   albums: [
+    { key: 'event_id', label: 'ID Événement lié (UUID)', type: 'text' },
     { key: 'event_title', label: 'Titre de l\'événement lié', type: 'text' },
     { key: 'event_date', label: 'Date de l\'événement', type: 'date' },
     { key: 'photos', label: 'Photos de l\'album', type: 'multiple_images' }

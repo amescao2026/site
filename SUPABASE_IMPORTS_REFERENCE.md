@@ -9,7 +9,7 @@
 // ============================================================================
 
 // ✅ Pour lire des données
-import { getEvents, getAlbums, getReports, getBoardMembers, getAbout, getMediaUrl } from '@/src/services/supabase';
+import { getEvents, getAlbums, getReports, getBoardMembers, getMediaUrl } from '@/src/services/supabase';
 import { getCurrentUserProfile, updateUserProfile } from '@/src/services/supabase';
 
 // ✅ Pour accès direct (mutations en temps réel, state management)
@@ -23,7 +23,7 @@ import { uploadFile } from '@/src/lib/upload';
 // ============================================================================
 
 // ✅ Utiliser le service layer (jamais le client directement)
-import { getEvents, getAbout } from '@/src/services/supabase';
+import { getEvents, getAlbums, getReports, getBoardMembers } from '@/src/services/supabase';
 
 // ❌ NE PAS faire ça côté serveur :
 // import { supabase } from '@/src/services/supabase/client'; // ❌ Mauvais

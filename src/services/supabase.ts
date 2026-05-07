@@ -1,7 +1,6 @@
 /**
  * Service Layer - Supabase
- * Fonctions métier pour accéder aux données
- * Centralise la logique d'accès aux données
+ * Fonctions métier pour accéder aux données Supabase
  */
 
 import { 
@@ -9,41 +8,58 @@ import {
   AlbumData, 
   ReportData, 
   BoardMemberData, 
-  AboutData,
   UserProfile
 } from '../types';
-import { supabase, SUPABASE_CONFIG } from './supabase/client';
-
-const STORAGE_BUCKET = 'amescao';
+import { supabase } from './supabase/client';
 
 /**
  * Construit l'URL publique d'un fichier Supabase Storage
- * Accepte les chemins relatifs et les URL complètes
+ * Accepte les URLs complètes (déjà stockées) ou les chemins relatifs
  */
-export const getMediaUrl = (path?: string): string => {
+export const getMediaUrl = (path?: string | null): string => {
   if (!path) return '';
   
-  // Si c'est déjà une URL complète, la retourner telle quelle
+  // Si c'est déjà une URL complète (http/https), la retourner telle quelle
   if (path.startsWith('http') || path.startsWith('//')) return path;
   
   // Sinon, construire l'URL Supabase Storage publique
-  return `${SUPABASE_CONFIG.storageUrl}/${STORAGE_BUCKET}/${path}`;
+  // Format: https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  if (!supabaseUrl) return path;
+  
+  return `${supabaseUrl}/storage/v1/object/public/amescao/${path}`;
 };
 
 /**
- * Utilitaire pour convertir les blocs de contenu texte (compatible STRAPI)
+ * Utilitaire pour convertir les blocs de contenu texte (rich text) en texte simple
+ * Compatible avec le format JSON de Supabase ou texte simple
  */
-export const renderBlocksToText = (blocks: any): string => {
-  if (!blocks) return '';
-  if (typeof blocks === 'string') return blocks;
-  if (!Array.isArray(blocks)) return '';
-  return blocks
-    .map((block) => block.children?.map((child: any) => child.text).join('') || '')
-    .join('\n');
+export const renderBlocksToText = (content: any): string => {
+  if (!content) return '';
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    return content
+      .map((block: any) => {
+        if (typeof block === 'string') return block;
+        if (block.children) {
+          return block.children.map((child: any) => child.text || '').join('');
+        }
+        return '';
+      })
+      .join('\n');
+  }
+  if (typeof content === 'object') {
+    // Si c'est un objet JSON de rich text
+    if (content.blocks) {
+      return content.blocks.map((block: any) => block.text || '').join('\n');
+    }
+    return JSON.stringify(content);
+  }
+  return '';
 };
 
 /**
- * Récupère tous les événements
+ * Récupère tous les événements triés par date décroissante
  */
 export async function getEvents(): Promise<EventData[]> {
   if (!supabase) return [];
@@ -60,22 +76,22 @@ export async function getEvents(): Promise<EventData[]> {
 
   return (data || []).map((item: any) => ({
     id: item.id,
-    documentId: item.id,
     title: item.title || '',
     date: item.date || '',
     location: item.location || '',
     description: item.content || '',
     content: item.content || '',
-    main_photo: item.cover_photo ? { url: item.cover_photo } : undefined,
-    other_photos: (item.other_photos || []).map((photo: string) => ({ url: photo })),
-  })) as EventData[];
+    cover_photo: item.cover_photo || undefined,
+    other_photos: item.other_photos || [],
+  })) as unknown as EventData[];
 }
 
 /**
- * Récupère tous les albums
+ * Récupère tous les albums triés par date décroissante
  */
 export async function getAlbums(): Promise<AlbumData[]> {
   if (!supabase) return [];
+  
   const { data, error } = await supabase
     .from('albums')
     .select('*')
@@ -88,18 +104,18 @@ export async function getAlbums(): Promise<AlbumData[]> {
 
   return (data || []).map((item: any) => ({
     id: item.id,
-    documentId: item.id,
-    title: item.event_title || '',
-    year: item.event_date ? new Date(item.event_date).getFullYear().toString() : '',
-    photos: (item.photos || []).map((photo: string) => ({ url: photo })),
-  })) as AlbumData[];
+    event_title: item.event_title || '',
+    event_date: item.event_date || '',
+    photos: item.photos || [],
+  })) as unknown as AlbumData[];
 }
 
 /**
- * Récupère tous les rapports
+ * Récupère tous les rapports triés par date décroissante
  */
 export async function getReports(): Promise<ReportData[]> {
   if (!supabase) return [];
+  
   const { data, error } = await supabase
     .from('reports')
     .select('*')
@@ -112,18 +128,20 @@ export async function getReports(): Promise<ReportData[]> {
 
   return (data || []).map((item: any) => ({
     id: item.id,
-    documentId: item.id,
     title: item.title || '',
+    date: item.date || '',
     year: item.date ? new Date(item.date).getFullYear().toString() : '',
-    file: item.document_pdf_link ? { url: item.document_pdf_link } : undefined,
-  })) as ReportData[];
+    content: item.content || '',
+    document_pdf_link: item.document_pdf_link || undefined,
+  })) as unknown as ReportData[];
 }
 
 /**
- * Récupère tous les membres du bureau triés par ordre
+ * Récupère tous les membres du bureau triés par ordre croissant
  */
 export async function getBoardMembers(): Promise<BoardMemberData[]> {
   if (!supabase) return [];
+  
   const { data, error } = await supabase
     .from('bureau')
     .select('*')
@@ -136,44 +154,13 @@ export async function getBoardMembers(): Promise<BoardMemberData[]> {
 
   return (data || []).map((item: any) => ({
     id: item.id,
-    documentId: item.id,
     name: item.name || '',
     surname: item.surname || '',
     order: item.order || 0,
     role: item.role || '',
-    photo: item.photo ? { url: item.photo } : undefined,
-    bio: item.biography || '',
-  })) as BoardMemberData[];
-}
-
-/**
- * Récupère les informations "À propos"
- */
-export async function getAbout(): Promise<AboutData> {
-  if (!supabase) return {
-    id: 0,
-    documentId: '',
-    text: '',
-  } as AboutData;
-  const { data, error } = await supabase
-    .from('about')
-    .select('*')
-    .single();
-
-  if (error || !data) {
-    console.error('Error fetching about:', error);
-    return {
-      id: 0,
-      documentId: '',
-      text: '',
-    } as AboutData;
-  }
-
-  return {
-    id: 0, // UUID from Supabase, but AboutData expects number
-    documentId: data.id,
-    text: data.content || data.text || '',
-  } as AboutData;
+    photo: item.photo || undefined,
+    biography: item.biography || '',
+  })) as unknown as BoardMemberData[];
 }
 
 /**

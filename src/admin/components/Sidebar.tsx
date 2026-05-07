@@ -1,14 +1,15 @@
+// Sidebar.tsx
 'use client';
 
 import React from 'react';
 import { Menu, LogOut, ChevronRight } from 'lucide-react';
-import { NavItem } from '../types';
+import { NavItem, TableName } from '../types';
 
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
-  activeTable: string;
-  onTableChange: (tableId: string) => void;
+  activeTable: TableName;
+  onTableChange: (tableId: TableName) => void;
   navigation: NavItem[];
   onLogout: () => void;
 }
@@ -40,6 +41,8 @@ export default function Sidebar({
         <button 
           onClick={onToggle}
           className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors ml-auto"
+          type="button"
+          aria-label={isOpen ? 'Réduire le menu' : 'Étendre le menu'}
         >
           <Menu size={20} />
         </button>
@@ -55,12 +58,13 @@ export default function Sidebar({
             <button
               key={nav.id}
               onClick={() => onTableChange(nav.id)}
-              title={!isOpen ? nav.label : ''}
+              title={!isOpen ? nav.label : undefined}
               className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 ${
                 isActive 
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20' 
                   : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
               }`}
+              type="button"
             >
               <Icon size={22} className={`shrink-0 ${isActive ? 'text-white' : ''}`} />
               
@@ -83,6 +87,7 @@ export default function Sidebar({
         <button 
           onClick={onLogout}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          type="button"
         >
           <LogOut size={22} className="shrink-0 text-red-400" />
           {isOpen && <span className="font-medium text-red-400">Déconnexion</span>}

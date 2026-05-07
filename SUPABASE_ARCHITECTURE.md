@@ -37,7 +37,7 @@ src/admin/config/
 **Fonction** : Couche d'abstraction pour les opérations métier
 
 **Fonctions** :
-- `getEvents()`, `getAlbums()`, `getReports()`, `getBoardMembers()`, `getAbout()`
+- `getEvents()`, `getAlbums()`, `getReports()`, `getBoardMembers()`
 - `getCurrentUserProfile()`, `updateUserProfile()`
 - `getMediaUrl()` - Construit les URLs Supabase Storage
 - `renderBlocksToText()` - Convertit blocks en texte

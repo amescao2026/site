@@ -1,4 +1,7 @@
+// types.ts
 // Types et interfaces pour l'admin
+
+export type TableName = 'profiles' | 'bureau' | 'events' | 'reports' | 'albums';
 
 export interface UserProfile {
   id: string;
@@ -6,10 +9,21 @@ export interface UserProfile {
   surname: string;
   email: string;
   photo?: string;
-  role: string;
+  role: 'member' | 'admin';
 }
 
-export type FieldType = 'text' | 'email' | 'number' | 'date' | 'datetime-local' | 'file_url' | 'select' | 'textarea' | 'rich_text' | 'single_image' | 'multiple_images';
+export type FieldType = 
+  | 'text' 
+  | 'email' 
+  | 'number' 
+  | 'date' 
+  | 'datetime-local' 
+  | 'file_url' 
+  | 'select' 
+  | 'textarea' 
+  | 'rich_text' 
+  | 'single_image' 
+  | 'multiple_images';
 
 export interface FieldSchema {
   key: string;
@@ -18,10 +32,22 @@ export interface FieldSchema {
   options?: string[];
 }
 
-export type TableSchemaMap = Record<string, FieldSchema[]>;
+export type TableSchemaMap = Record<TableName, FieldSchema[]>;
 
 export interface NavItem {
-  id: string;
+  id: TableName;
   label: string;
-  icon: any;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+}
+
+export interface DatabaseItem {
+  id: string;
+  created_at?: string;
+  [key: string]: any;
+}
+
+export interface ApiError {
+  message: string;
+  code?: string;
+  details?: string;
 }

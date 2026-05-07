@@ -1,6 +1,7 @@
+// page.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Calendar, ImageIcon, FileText, Users, UserCircle } from 'lucide-react';
 
 // Imports des composants admin modulaires
@@ -13,80 +14,84 @@ import FormModal from '@/src/admin/components/modals/FormModal';
 // Imports des hooks et services
 import { useAdminData } from '@/src/admin/hooks/useAdminData';
 import { logoutUser } from '@/src/admin/config/database';
-import { NavItem } from '@/src/admin/types';
+import { NavItem, TableName, DatabaseItem } from '@/src/admin/types';
+
+const NAVIGATION: NavItem[] = [
+  { id: 'events', label: 'Événements', icon: Calendar },
+  { id: 'albums', label: 'Albums Photos', icon: ImageIcon },
+  { id: 'reports', label: 'Rapports', icon: FileText },
+  { id: 'bureau', label: 'Membres du Bureau', icon: Users },
+  { id: 'profiles', label: 'Profils Utilisateurs', icon: UserCircle },
+];
 
 /**
  * Page Admin - Tableau de bord pour gérer le contenu Supabase
- * 
- * Architecture modulaire refactorisée :
- * - AdminGuard : Protection (vérification du rôle admin)
- * - Sidebar : Navigation avec tables
- * - Header : En-tête avec compteur d'éléments
- * - MainContent : Grille d'éléments avec actions
- * - FormModal : Formulaire dynamique pour create/update
- * - useAdminData : Hook personnalisé pour la gestion des données et des CRUD
- * 
- * Tous les composants modulaires sont dans src/admin/ pour une meilleure organisation.
- * Services de database dans src/admin/config/database.ts
- * Types dans src/admin/types.ts
- * Schémas dans src/admin/schemas.ts
  */
 export default function AdminPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeTable, setActiveTable] = useState('events');
+  const [activeTable, setActiveTable] = useState<TableName>('events');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Record<string, any> | null>(null);
-
-  // Données de navigation
-  const NAVIGATION: NavItem[] = [
-    { id: 'events', label: 'Événements', icon: Calendar },
-    { id: 'albums', label: 'Albums Photos', icon: ImageIcon },
-    { id: 'reports', label: 'Rapports', icon: FileText },
-    { id: 'bureau', label: 'Membres du Bureau', icon: Users },
-    { id: 'profiles', label: 'Profils Utilisateurs', icon: UserCircle },
-  ];
+  const [selectedItem, setSelectedItem] = useState<DatabaseItem | null>(null);
 
   // Hook pour gérer les données
-  const { data, isLoading, onSave, onDelete } = useAdminData(activeTable);
+  const { data, isLoading, error, onSave, onDelete } = useAdminData(activeTable);
 
-  // Handlers
-  const handleEdit = (item: Record<string, any>) => {
+  // Handlers mémoïsés pour éviter les re-renders inutiles
+  const handleEdit = useCallback((item: DatabaseItem) => {
     setSelectedItem(item);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleAddNew = () => {
+  const handleAddNew = useCallback(() => {
     setSelectedItem(null);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.')) {
+      return;
+    }
+    
     try {
       await onDelete(id);
-    } catch (error) {
-      console.error('Delete error', error);
-      alert('Erreur lors de la suppression.');
+    } catch (error: any) {
+      console.error('Delete error:', error);
+      alert(`Erreur lors de la suppression: ${error.message}`);
     }
-  };
+  }, [onDelete]);
 
-  const handleSaveModal = async (savedData: Record<string, any>) => {
+  const handleSaveModal = useCallback(async (savedData: DatabaseItem) => {
     try {
       await onSave(savedData);
-    } catch (error) {
-      console.error('Save error', error);
-      throw error;
+    } catch (error: any) {
+      console.error('Save error:', error);
+      throw error; // Remonter pour que FormModal puisse afficher l'erreur
     }
-  };
+  }, [onSave]);
 
-  const handleLogout = async () => {
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    // Délai pour laisser l'animation se terminer avant de reset
+    setTimeout(() => setSelectedItem(null), 300);
+  }, []);
+
+  const handleLogout = useCallback(async () => {
     try {
       await logoutUser();
       window.location.href = '/auth/login';
-    } catch (error) {
-      console.error('Logout error', error);
-      alert('Erreur lors de la déconnexion');
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      alert(`Erreur lors de la déconnexion: ${error.message}`);
     }
-  };
+  }, []);
+
+  const handleTableChange = useCallback((tableId: string) => {
+    setActiveTable(tableId as TableName);
+    // Fermer le modal si ouvert lors du changement de table
+    if (isModalOpen) {
+      handleCloseModal();
+    }
+  }, [isModalOpen, handleCloseModal]);
 
   return (
     <AdminGuard>
@@ -95,9 +100,9 @@ export default function AdminPage() {
         {/* Sidebar Navigation */}
         <Sidebar
           isOpen={isSidebarOpen}
-          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+          onToggle={() => setIsSidebarOpen(prev => !prev)}
           activeTable={activeTable}
-          onTableChange={setActiveTable}
+          onTableChange={handleTableChange}
           navigation={NAVIGATION}
           onLogout={handleLogout}
         />
@@ -116,6 +121,7 @@ export default function AdminPage() {
           <MainContent
             activeTable={activeTable}
             isLoading={isLoading}
+            error={error}
             data={data}
             onAddNew={handleAddNew}
             onEdit={handleEdit}
@@ -128,7 +134,7 @@ export default function AdminPage() {
           <FormModal 
             table={activeTable}
             item={selectedItem}
-            onClose={() => setIsModalOpen(false)}
+            onClose={handleCloseModal}
             onSave={handleSaveModal}
           />
         )}
@@ -136,5 +142,3 @@ export default function AdminPage() {
     </AdminGuard>
   );
 }
-
-

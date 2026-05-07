@@ -13,9 +13,10 @@ import { EventData, ReportData, BoardMemberData, translations, Language } from '
 import { useLanguage } from '../components/LanguageContext';
 import { useTheme } from '../components/ThemeContext';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import Timeline from '../components/Timeline';
 import EventModal from '../components/EventModal';
-import {HeroSection} from '../components/HeroSection';
+import { HeroSection } from '../components/HeroSection';
 import Image from 'next/image';
 import { FileText, Users, Calendar, ArrowRight, Heart, Download, ExternalLink, ChevronDown, Menu, X as XIcon } from 'lucide-react';
 
@@ -29,7 +30,7 @@ export default function Home() {
   const [boardMembers, setBoardMembers] = useState<BoardMemberData[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [expandedMember, setExpandedMember] = useState<number | null>(null);
+  const [expandedMember, setExpandedMember] = useState<string | null>(null);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
   const isDark = theme === 'dark';
@@ -42,17 +43,13 @@ export default function Home() {
           getReports(),
           getBoardMembers()
         ]);
-        // Trier les événements par date (du plus récent au plus ancien)
-        const toTime = (d: any) => {
-          const t = new Date(d).getTime();
-          return Number.isNaN(t) ? 0 : t;
-        };
-        eventsData.sort((a: any, b: any) => toTime(b.date) - toTime(a.date));
+        
+        // Les données sont déjà triées par le service Supabase
         setEvents(eventsData);
         setReports(reportsData);
         setBoardMembers(boardData);
       } catch (error) {
-        console.error('Error fetching data from Strapi:', error);
+        console.error('Error fetching data from Supabase:', error);
       } finally {
         setLoading(false);
       }
@@ -74,18 +71,6 @@ export default function Home() {
 
   // hauteur max ~5 items : 5 × 64px + padding
   const PANEL_MAX_H = 'max-h-[340px]';
-
-  // Some Strapi relations may come back as objects; normalize role to a string
-  const getRoleName = (role: any): string => {
-    if (!role) return '';
-    if (typeof role === 'string') return role;
-    if (typeof role === 'object') {
-      if ((role as any).name && typeof (role as any).name === 'string') return (role as any).name;
-      if ((role as any).attributes && (role as any).attributes.name) return (role as any).attributes.name;
-      if ((role as any).data && (role as any).data.attributes && (role as any).data.attributes.name) return (role as any).data.attributes.name;
-    }
-    return '';
-  };
 
   /* ═══════════════════════════════════════════════════════════════
      COMPOSANT SIDEBAR - Réutilisable pour desktop et mobile
@@ -126,13 +111,14 @@ export default function Home() {
                       <div className={`w-10 h-10 rounded-full overflow-hidden ring-2 ${
                         expandedMember === member.id ? 'ring-emerald-500' : 'ring-subtle'
                       }`}>
-                        {getMediaUrl(member.photo?.url) ? (
+                        {member.photo ? (
                           <Image
-                            src={getMediaUrl(member.photo?.url)}
+                            src={getMediaUrl(member.photo)}
                             alt={`${member.name} ${member.surname || ''}`}
                             width={40}
                             height={40}
                             className="object-cover w-full h-full"
+                            unoptimized={member.photo.startsWith('http')}
                           />
                         ) : (
                           <div className={`w-full h-full flex items-center justify-center text-sm font-black ${
@@ -151,7 +137,7 @@ export default function Home() {
                         {member.name} {member.surname}
                       </p>
                       <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider truncate mt-0.5">
-                        {getRoleName(member.role)}
+                        {member.role}
                       </p>
                     </div>
 
@@ -173,7 +159,7 @@ export default function Home() {
                         <div className={`py-2.5 px-3 rounded-xl text-xs leading-relaxed mb-1 ${
                           isDark ? 'bg-zinc-800/50 text-zinc-400' : 'bg-stone-100 text-stone-500'
                         }`}>
-                          {(member as any).bio || 'Aucune biographie disponible.'}
+                          {member.biography || 'Aucune biographie disponible.'}
                         </div>
                       </motion.div>
                     )}
@@ -224,29 +210,37 @@ export default function Home() {
                       <p className={`text-xs font-bold leading-snug mb-1 ${isDark ? 'text-zinc-100' : 'text-stone-800'}`}>
                         {report.title}
                       </p>
-                      {report.year && (
+                      {report.date && (
                         <p className={`text-[10px] mb-2 ${isDark ? 'text-zinc-500' : 'text-stone-400'}`}>
-                          {new Date(report.year).getFullYear()}
+                          {new Date(report.date).getFullYear()}
                         </p>
                       )}
                       <div className="flex gap-1.5">
-                        <a
-                          href={getMediaUrl(report.file?.url)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-500 transition-colors"
-                        >
-                          <ExternalLink size={9} /> Lire
-                        </a>
-                        <a
-                          href={getMediaUrl(report.file?.url)}
-                          download
-                          className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors ${
-                            isDark ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600' : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
-                          }`}
-                        >
-                          <Download size={9} /> PDF
-                        </a>
+                        {report.document_pdf_link ? (
+                          <>
+                            <a
+                              href={getMediaUrl(report.document_pdf_link)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-500 transition-colors"
+                            >
+                              <ExternalLink size={9} /> Lire
+                            </a>
+                            <a
+                              href={getMediaUrl(report.document_pdf_link)}
+                              download
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+                                isDark ? 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600' : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
+                              }`}
+                            >
+                              <Download size={9} /> PDF
+                            </a>
+                          </>
+                        ) : (
+                          <span className={`text-[10px] ${isDark ? 'text-zinc-600' : 'text-stone-400'}`}>
+                            Document non disponible
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -316,18 +310,19 @@ export default function Home() {
             />
 
             {/* Sidebar Panel */}
-              <motion.div
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className={`fixed top-0 left-0 h-full w-[85vw] max-w-[340px] z-50 overflow-y-auto lg:hidden bg-app`}
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className={`fixed top-0 left-0 h-full w-[85vw] max-w-[340px] z-50 overflow-y-auto lg:hidden bg-app`}
               style={{ scrollbarWidth: 'none' }}
             >
               {/* Header avec bouton fermer */}
               <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-4 border-b bg-app border-subtle">
                 <h3 className="font-bold text-lg">Informations</h3>
                 <button
+                  onClick={() => setShowMobileSidebar(false)}
                   className={`p-2 rounded-xl transition-colors ${
                     isDark ? 'hover:bg-zinc-800' : 'hover:bg-stone-100'
                   }`}
@@ -458,13 +453,14 @@ export default function Home() {
                     >
                       {/* Image principale */}
                       <div className="relative w-full aspect-[4/3] overflow-hidden">
-                        {getMediaUrl(event.main_photo?.url) ? (
+                        {event.cover_photo ? (
                           <Image
-                            src={getMediaUrl(event.main_photo?.url)}
+                            src={getMediaUrl(event.cover_photo)}
                             alt={event.title}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            unoptimized={event.cover_photo.startsWith('http')}
                           />
                         ) : (
                           <div className={`w-full h-full flex items-center justify-center ${
@@ -550,6 +546,7 @@ export default function Home() {
           onClose={() => setSelectedEvent(null)}
         />
       )}
+
     </div>
   );
 }

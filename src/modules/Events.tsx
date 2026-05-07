@@ -7,6 +7,7 @@ import { EventData, translations } from "../types";
 import { useLanguage } from "../components/LanguageContext";
 import { useTheme } from "../components/ThemeContext";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import Timeline from "../components/Timeline";
 import EventModal from "../components/EventModal";
 import Image from "next/image";
@@ -63,10 +64,9 @@ export default function Events() {
               <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-2">
                 {t.events.title}
               </h1>
-<p className="text-xl text-justify text-zinc-500 max-w-xl mx-auto">
-  {t.events.timeline}
-</p>
-
+              <p className="text-xl text-justify text-zinc-500 max-w-xl mx-auto">
+                {t.events.timeline}
+              </p>
             </motion.div>
 
             <motion.div
@@ -142,7 +142,7 @@ export default function Events() {
                 ) : (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {sortedEvents.map((event, idx) => {
-                      const imageUrl = getMediaUrl(event.main_photo?.url);
+                      const imageUrl = getMediaUrl(event.cover_photo);
                       return (
                         <motion.div
                           key={event.id}
@@ -163,6 +163,7 @@ export default function Events() {
                                 fill
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                unoptimized={event.cover_photo?.startsWith('http') || false}
                               />
                             ) : (
                               <div className={`w-full h-full flex items-center justify-center ${isDark ? "bg-zinc-800" : "bg-stone-100"}`}>
@@ -214,14 +215,15 @@ export default function Events() {
                     title: event.title,
                     content: (
                       <div className="space-y-4">
-                        {getMediaUrl(event.main_photo?.url) && (
+                        {event.cover_photo && (
                           <div className="relative w-full aspect-video rounded-2xl overflow-hidden">
                             <Image
-                              src={getMediaUrl(event.main_photo?.url)}
+                              src={getMediaUrl(event.cover_photo)}
                               alt={event.title}
                               fill
                               sizes="(max-width: 768px) 100vw, 50vw"
                               className="object-cover"
+                              unoptimized={event.cover_photo.startsWith('http')}
                             />
                           </div>
                         )}
@@ -245,6 +247,7 @@ export default function Events() {
           </AnimatePresence>
         </div>
       </section>
+
 
       {selectedEvent && (
         <EventModal

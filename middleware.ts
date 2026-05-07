@@ -1,99 +1,62 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { updateSession } from './src/services/supabase/middleware'
 
-export function middleware(req: NextRequest) {
-  const url = req.nextUrl.clone()
+export async function middleware(req: NextRequest) {
+  // 1. Mettre à jour les cookies Supabase
+  const res = await updateSession(req)
+
   const pathname = req.nextUrl.pathname
-
-  // ✅ Si l’utilisateur va sur la racine /
-  if (pathname === '/') {
-    // Rediriger directement vers /admin
-    url.pathname = '/admin'
-    return NextResponse.redirect(url)
-  }
-
-  // ✅ Si l’utilisateur va sur /auth/login ou /auth/signup
-  if (pathname.startsWith('/auth')) {
-    // Rediriger directement vers /admin
-    url.pathname = '/admin'
-    return NextResponse.redirect(url)
-  }
-
-  // ✅ Si l’utilisateur va sur /home ou autres pages protégées
-  if (pathname.startsWith('/home') || pathname.startsWith('/about') || pathname.startsWith('/albums') || pathname.startsWith('/events') || pathname.startsWith('/contact') || pathname.startsWith('/support')) {
-    // Rediriger directement vers /admin
-    url.pathname = '/admin'
-    return NextResponse.redirect(url)
-  }
-
-  // ✅ Si l’utilisateur va sur /admin
-  if (pathname.startsWith('/admin')) {
-    // Laisser passer sans auth
-    return NextResponse.next()
-  }
-
-  return NextResponse.next()
-}
-
-export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|public).*)',
-  ],
-}
-
-
-
-/*import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-
-export function middleware(req: NextRequest) {
   const url = req.nextUrl.clone()
-  const pathname = req.nextUrl.pathname
 
-  // Routes publiques (pas d'authentification requise)
   const publicRoutes = ['/auth/login', '/auth/signup']
-  
-  // Routes protégées (authentification requise)
   const protectedRoutes = ['/home', '/about', '/albums', '/events', '/contact', '/support']
-  
-  // Routes admin (authentification + rôle admin requis)
   const adminRoutes = ['/admin']
 
-  // Vérifier si utilisateur a un token de session
-  const hasSession = req.cookies.get('sb-access-token')
+  // 2. Vérifier la session utilisateur via les cookies (maintenant disponibles)
+  const { createServerClient } = await import('@supabase/ssr')
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return req.cookies.get(name)?.value
+        },
+      },
+    }
+  )
 
-  // ✅ CAS 1: Utilisateur sur page publique (login/signup)
+  const { data: { user } } = await supabase.auth.getUser()
+  const hasSession = !!user
+
+  console.log(`[Middleware] 🔍 ${pathname} | session: ${hasSession}`)
+
+  // 3. Redirections
   if (publicRoutes.some(route => pathname.startsWith(route))) {
-    // Si connecté → rediriger vers /home
     if (hasSession) {
       url.pathname = '/home'
       return NextResponse.redirect(url)
     }
-    return NextResponse.next()
+    return res
   }
 
-  // ✅ CAS 2: Utilisateur sur page protégée (/home, /about, etc.)
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
-    // Si pas connecté → rediriger vers login
     if (!hasSession) {
       url.pathname = '/auth/login'
       return NextResponse.redirect(url)
     }
-    return NextResponse.next()
+    return res
   }
 
-  // ✅ CAS 3: Utilisateur sur /admin
   if (adminRoutes.some(route => pathname.startsWith(route))) {
-    // Si pas connecté → rediriger vers login
     if (!hasSession) {
       url.pathname = '/auth/login'
       return NextResponse.redirect(url)
     }
-    // La vérification du rôle = 'admin' se fait côté client (admin/layout.tsx)
-    return NextResponse.next()
+    return res
   }
 
-  // ✅ CAS 4: Page racine /
   if (pathname === '/') {
     if (hasSession) {
       url.pathname = '/home'
@@ -103,11 +66,18 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  return NextResponse.next()
+  return res
 }
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
     '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
-}*/
+}

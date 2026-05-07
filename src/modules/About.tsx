@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { getAbout, renderBlocksToText } from '../services/supabase';
-import { AboutData, translations, Language } from '../types';
+import { translations } from '../types';
 import { useLanguage } from '../components/LanguageContext';
 import { useTheme } from '../components/ThemeContext';
 import Navbar from '../components/Navbar';
@@ -15,24 +14,6 @@ export default function About() {
   const { language } = useLanguage();
   const { theme } = useTheme();
   const t = translations[language];
-
-  const [aboutData, setAboutData] = useState<AboutData | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getAbout();
-        setAboutData(data);
-      } catch (error) {
-        console.error('Error fetching about data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const sections = [
     { icon: <BookOpen className="text-emerald-600" />, title: t.contact.historyTitle, content: "L&apos;AMESCAO est née d&apos;une volonté commune des jeunes du Canton d&apos;Aouda de se regrouper pour porter des projets d&apos;envergure. Depuis sa création, elle a su s&apos;imposer comme un acteur incontournable du développement local." },
@@ -78,11 +59,7 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              className="p-8 bg-card rounded-2xl shadow-xl shadow-black/5"
-            >
-              <div className="mb-6 p-3 bg-emerald-600/10 rounded-xl w-fit">
-                {section.icon}
-              </div>
+            <p>{t.home.presentationText}</p></div>
               <h3 className="text-xl font-bold mb-4">{section.title}</h3>
               <p className="text-muted text-sm leading-relaxed">
                 {section.content}

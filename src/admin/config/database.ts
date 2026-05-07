@@ -1,46 +1,71 @@
+// database.ts
 import { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../../services/supabase/client';
-import { UserProfile } from '../types';
+import { UserProfile, ApiError, TableName } from '../types';
 
 // ============================================================================
 // 🗄️ CRUD OPERATIONS
 // ============================================================================
 
-export const getAll = async (table: string): Promise<any[]> => {
+/**
+ * Détermine la colonne et direction de tri selon la table
+ */
+const getTableOrderConfig = (table: TableName): { column: string; ascending: boolean } => {
+  const configs: Record<TableName, { column: string; ascending: boolean }> = {
+    profiles: { column: 'created_at', ascending: false },
+    bureau: { column: 'order', ascending: true },
+    events: { column: 'date', ascending: false },
+    reports: { column: 'date', ascending: false },
+    albums: { column: 'event_date', ascending: false }
+  };
+  
+  return configs[table] || { column: 'created_at', ascending: false };
+};
+
+export const getAll = async (table: TableName): Promise<any[]> => {
   if (!supabase) {
     console.error('[Database] ❌ Supabase client is not initialized');
     throw new Error('Supabase client is not initialized');
   }
   
-  let orderCol = 'created_at';
-  if (table === 'bureau') orderCol = 'order';
-  if (table === 'events' || table === 'reports') orderCol = 'date';
+  const { column, ascending } = getTableOrderConfig(table);
   
-  console.log(`[Database] 📡 Fetching all from ${table} ordered by ${orderCol}`);
+  console.log(`[Database] 📡 Fetching all from table "${table}" ordered by "${column}" (ascending: ${ascending})`);
+  
   const { data, error } = await supabase
     .from(table)
     .select('*')
-    .order(orderCol, { ascending: table === 'bureau' });
+    .order(column, { ascending });
   
   if (error) {
-    console.error(`[Database] ❌ Error fetching ${table}:`, error);
-    throw error;
+    console.error(`[Database] ❌ Error fetching from ${table}:`, {
+      message: error.message,
+      code: error.code,
+      details: error.details
+    });
+    throw new Error(`Failed to fetch from ${table}: ${error.message}`);
   }
   
-  console.log(`[Database] ✅ Fetched ${data?.length || 0} items from ${table}`);
+  console.log(`[Database] ✅ Successfully fetched ${data?.length || 0} items from "${table}"`);
   return data || [];
 };
 
-export const insertItem = async (table: string, payload: Record<string, any>): Promise<any> => {
+export const insertItem = async (table: TableName, payload: Record<string, any>): Promise<any> => {
   if (!supabase) {
     console.error('[Database] ❌ Supabase client is not initialized');
     throw new Error('Supabase client is not initialized');
   }
   
-  console.log(`[Database] ➕ Inserting into ${table}:`, payload);
+  // Nettoyer le payload : retirer l'id vide pour les insertions
+  const cleanPayload = { ...payload };
+  if (!cleanPayload.id || cleanPayload.id === '') {
+    delete cleanPayload.id;
+  }
+  
+  console.log(`[Database] ➕ Inserting into ${table}:`, cleanPayload);
   const { data, error } = await supabase
     .from(table)
-    .insert([payload])
+    .insert([cleanPayload])
     .select();
   
   if (error) {
@@ -52,16 +77,23 @@ export const insertItem = async (table: string, payload: Record<string, any>): P
   return data;
 };
 
-export const updateItem = async (table: string, id: string, payload: Record<string, any>): Promise<any> => {
+export const updateItem = async (table: TableName, id: string, payload: Record<string, any>): Promise<any> => {
   if (!supabase) {
     console.error('[Database] ❌ Supabase client is not initialized');
     throw new Error('Supabase client is not initialized');
   }
   
-  console.log(`[Database] ✏️ Updating ${table} with id ${id}:`, payload);
+  if (!id) {
+    throw new Error('ID is required for update operation');
+  }
+  
+  // Nettoyer le payload : retirer l'id pour éviter les conflits
+  const { id: _, ...updatePayload } = payload;
+  
+  console.log(`[Database] ✏️ Updating ${table} with id ${id}:`, updatePayload);
   const { data, error } = await supabase
     .from(table)
-    .update(payload)
+    .update(updatePayload)
     .eq('id', id)
     .select();
   
@@ -74,10 +106,14 @@ export const updateItem = async (table: string, id: string, payload: Record<stri
   return data;
 };
 
-export const deleteItem = async (table: string, id: string): Promise<void> => {
+export const deleteItem = async (table: TableName, id: string): Promise<void> => {
   if (!supabase) {
     console.error('[Database] ❌ Supabase client is not initialized');
     throw new Error('Supabase client is not initialized');
+  }
+  
+  if (!id) {
+    throw new Error('ID is required for delete operation');
   }
   
   console.log(`[Database] 🗑️ Deleting from ${table} with id ${id}`);
@@ -99,7 +135,7 @@ export const deleteItem = async (table: string, id: string): Promise<void> => {
 // ============================================================================
 
 const generateFileName = (file: File): string => {
-  const ext = file.name.split('.').pop();
+  const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
   const unique = `${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
   return `${unique}.${ext}`;
 };
@@ -115,22 +151,37 @@ export const uploadFile = async (file: File, bucket: string = 'amescao'): Promis
     throw new Error('Aucun fichier fourni');
   }
 
+  // Vérifier la taille (limite à 10MB par défaut)
+  const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+  if (file.size > MAX_SIZE) {
+    throw new Error(`Fichier trop volumineux. Limite: 10MB`);
+  }
+
   const fileName = generateFileName(file);
   console.log(`[Upload] 📤 Uploading file: ${fileName} to bucket: ${bucket}`);
 
   const { error } = await supabase.storage
     .from(bucket)
-    .upload(fileName, file, { cacheControl: '3600', upsert: false });
+    .upload(fileName, file, { 
+      cacheControl: '3600', 
+      upsert: false 
+    });
 
   if (error) {
     console.error('[Upload] ❌ Upload error:', error);
+    
+    // Message d'erreur spécifique si le bucket n'existe pas
+    if (error.message?.includes('bucket') || error.message?.includes('not found')) {
+      throw new Error(`Le bucket "${bucket}" n'existe pas dans Supabase Storage. Créez-le d'abord.`);
+    }
+    
     throw error;
   }
 
   const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
   if (!data?.publicUrl) {
     console.error('[Upload] ❌ Could not get public URL');
-    throw new Error('Impossible de récupérer l\'URL');
+    throw new Error('Impossible de récupérer l\'URL publique du fichier');
   }
 
   console.log(`[Upload] ✅ File uploaded successfully: ${data.publicUrl}`);
@@ -138,7 +189,7 @@ export const uploadFile = async (file: File, bucket: string = 'amescao'): Promis
 };
 
 // ============================================================================
-// 👤 USER PROFILE
+// 👤 USER PROFILE & AUTH
 // ============================================================================
 
 export async function getCurrentUserProfile(): Promise<UserProfile | null> {
@@ -175,7 +226,7 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
       surname: data.surname || '',
       email: data.email || authData.session.user.email || '',
       photo: data.photo || undefined,
-      role: data.role || 'member',
+      role: data.role === 'admin' ? 'admin' : 'member',
     };
 
     console.log(`[Auth] ✅ Profile loaded: ${profile.name} ${profile.surname} (${profile.role})`);
@@ -184,6 +235,14 @@ export async function getCurrentUserProfile(): Promise<UserProfile | null> {
     console.error('[Auth] ❌ Exception fetching user profile:', error);
     return null;
   }
+}
+
+/**
+ * Vérifie si l'utilisateur courant est admin
+ */
+export async function isCurrentUserAdmin(): Promise<boolean> {
+  const profile = await getCurrentUserProfile();
+  return profile?.role === 'admin';
 }
 
 export async function logoutUser(): Promise<void> {
