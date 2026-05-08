@@ -59,7 +59,7 @@ export default function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-            <p>{t.home.presentationText}</p></div>
+            >
               <h3 className="text-xl font-bold mb-4">{section.title}</h3>
               <p className="text-muted text-sm leading-relaxed">
                 {section.content}
