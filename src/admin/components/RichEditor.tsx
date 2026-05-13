@@ -17,6 +17,22 @@ interface ToolbarButtonProps {
   isActive?: boolean;
 }
 
+// Composant ToolbarButton déplacé hors du render
+const ToolbarButton = ({ onClick, icon: Icon, title, isActive }: ToolbarButtonProps) => (
+  <button
+    type="button"
+    onClick={onClick}
+    title={title}
+    className={`p-2 rounded transition-colors ${
+      isActive 
+        ? 'bg-blue-100 text-blue-700' 
+        : 'text-gray-600 hover:bg-gray-100'
+    }`}
+  >
+    <Icon size={18} />
+  </button>
+);
+
 /**
  * Éditeur texte riche (WYSIWYG)
  */
@@ -59,21 +75,6 @@ export default function RichEditor({ content, setContent }: RichEditorProps) {
       });
     }
   }, [setContent]);
-
-  const ToolbarButton = ({ onClick, icon: Icon, title, isActive }: ToolbarButtonProps) => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`p-2 rounded transition-colors ${
-        isActive 
-          ? 'bg-blue-100 text-blue-700' 
-          : 'text-gray-600 hover:bg-gray-100'
-      }`}
-    >
-      <Icon size={18} />
-    </button>
-  );
 
   return (
     <div className="border rounded-lg overflow-hidden bg-white shadow-sm focus-within:ring-2 focus-within:ring-blue-500 transition-all">

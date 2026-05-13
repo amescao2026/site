@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { saveUserConsent } from '@/src/actions/consent';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { X, Check, Cookie, BarChart3, Target, Shield } from 'lucide-react';
 
 interface ConsentState {
@@ -134,22 +134,22 @@ export default function CookieBanner() {
   };
 
   // Animation d'entrée
-  const bannerVariants = {
+  const bannerVariants: Variants = {
     hidden: { y: 100, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: 'spring', stiffness: 300, damping: 30 },
+      transition: { type: 'spring', stiffness: 300, damping: 30 } as any,
     },
-    exit: { y: 100, opacity: 0, transition: { duration: 0.2 } },
+    exit: { y: 100, opacity: 0, transition: { duration: 0.2 } as any },
   };
 
-  const successVariants = {
+  const successVariants: Variants = {
     hidden: { scale: 0.8, opacity: 0 },
     visible: {
       scale: 1,
       opacity: 1,
-      transition: { type: 'spring', stiffness: 400, damping: 25 },
+      transition: { type: 'spring', stiffness: 400, damping: 25 } as any,
     },
   };
 

@@ -1,0 +1,4 @@
+COOKIE_RGPD_EXAMPLES.ts
+node_modules/
+.next/
+build/
