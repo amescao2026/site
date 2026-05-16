@@ -22,12 +22,18 @@ export default function MultipleImageUpload({ urls = [], onUpload, onRemove, lab
     if (files.length > 0) {
       try {
         setIsUploading(true);
-        const uploadPromises = files.map(file => uploadFile(file));
-        const newUrls = await Promise.all(uploadPromises);
-        onUpload(newUrls);
+        console.log(`[MultipleImageUpload] 📤 Starting batch upload: ${files.length} files`)
+        const uploadPromises = files.map((file, idx) => {
+          console.log(`[MultipleImageUpload] 📤 Uploading file ${idx + 1}/${files.length}: ${file.name}`)
+          return uploadFile(file)
+        })
+        const newUrls = await Promise.all(uploadPromises)
+        console.log(`[MultipleImageUpload] ✅ Batch upload successful: ${newUrls.length} files`)
+        onUpload(newUrls)
       } catch (error) {
-        console.error("Erreur d'upload multiple", error);
-        alert("Erreur lors de l'envoi d'une ou plusieurs images.");
+        console.error("[MultipleImageUpload] ❌ Erreur d'upload multiple", error)
+        console.error("[MultipleImageUpload] 🔍 Error details:", error instanceof Error ? error.message : error)
+        alert(`Erreur lors du téléchargement: ${error instanceof Error ? error.message : "Erreur inconnue"}`)
       } finally {
         setIsUploading(false);
       }

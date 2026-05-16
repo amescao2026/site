@@ -100,12 +100,16 @@ export default function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
     if (file) {
       try {
         setIsUploadingPhoto(true)
+        console.log(`[ProfileModal] 📤 Starting profile photo upload: ${file.name} (${file.type}, ${file.size} bytes)`)
         const uploadedUrl = await uploadFile(file)
+        console.log(`[ProfileModal] ✅ Profile photo upload successful: ${uploadedUrl}`)
         setEditedProfile(prev => ({ ...prev, photo: uploadedUrl }))
         showNotification('success', 'Photo téléchargée avec succès')
       } catch (error) {
-        console.error("Erreur d'upload", error)
-        showNotification('error', "Erreur lors du téléchargement de la photo")
+        console.error("[ProfileModal] ❌ Erreur d'upload", error)
+        console.error("[ProfileModal] 🔍 Error details:", error instanceof Error ? error.message : error)
+        const errorMsg = error instanceof Error ? error.message : "Erreur inconnue lors du téléchargement de la photo"
+        showNotification('error', errorMsg)
       } finally {
         setIsUploadingPhoto(false)
       }

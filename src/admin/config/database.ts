@@ -32,6 +32,16 @@ export const getAll = async (table: TableName): Promise<any[]> => {
   
   console.log(`[Database] 📡 Fetching all from table "${table}" ordered by "${column}" (ascending: ${ascending})`);
   
+  // Vérifier si l'utilisateur est authentifié
+  const { data: { session }, error: authError } = await supabase.auth.getSession();
+  if (authError) {
+    console.warn('[Database] ⚠️ Auth error:', authError);
+  } else if (session?.user) {
+    console.log(`[Database] 👤 Authenticated as: ${session.user.email} (ID: ${session.user.id})`);
+  } else {
+    console.warn('[Database] ⚠️ No authenticated session - operations may be blocked by RLS');
+  }
+  
   const { data, error } = await supabase
     .from(table)
     .select('*')
@@ -41,7 +51,8 @@ export const getAll = async (table: TableName): Promise<any[]> => {
     console.error(`[Database] ❌ Error fetching from ${table}:`, {
       message: error.message,
       code: error.code,
-      details: error.details
+      details: error.details,
+      hint: error.hint
     });
     throw new Error(`Failed to fetch from ${table}: ${error.message}`);
   }
@@ -159,6 +170,7 @@ export const uploadFile = async (file: File, bucket: string = 'amescao'): Promis
 
   const fileName = generateFileName(file);
   console.log(`[Upload] 📤 Uploading file: ${fileName} to bucket: ${bucket}`);
+  console.log(`[Upload] 📊 File details: ${file.type}, ${file.size} bytes`);
 
   const { error } = await supabase.storage
     .from(bucket)
@@ -169,10 +181,23 @@ export const uploadFile = async (file: File, bucket: string = 'amescao'): Promis
 
   if (error) {
     console.error('[Upload] ❌ Upload error:', error);
+    console.error('[Upload] 🔍 Error details:', {
+      message: error.message,
+      status: (error as any)?.status,
+      statusCode: (error as any)?.statusCode,
+    });
     
-    // Message d'erreur spécifique si le bucket n'existe pas
+    // Message d'erreur spécifique selon le type d'erreur
     if (error.message?.includes('bucket') || error.message?.includes('not found')) {
       throw new Error(`Le bucket "${bucket}" n'existe pas dans Supabase Storage. Créez-le d'abord.`);
+    }
+    
+    if (error.message?.includes('permission') || error.message?.includes('Unauthorized')) {
+      throw new Error(`Vous n'avez pas les permissions pour uploader dans ce bucket. Vérifiez les RLS policies du bucket.`);
+    }
+    
+    if ((error as any)?.status === 403) {
+      throw new Error(`Accès refusé pour l'upload. Les RLS policies du bucket restreignent cet accès.`);
     }
     
     throw error;

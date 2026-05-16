@@ -22,11 +22,14 @@ export default function SingleImageUpload({ url, onUpload, onRemove, label }: Si
     if (file) {
       try {
         setIsUploading(true);
-        const uploadedUrl = await uploadFile(file);
-        onUpload(uploadedUrl);
+        console.log(`[SingleImageUpload] 📤 Starting upload: ${file.name} (${file.type}, ${file.size} bytes)`)
+        const uploadedUrl = await uploadFile(file)
+        console.log(`[SingleImageUpload] ✅ Upload successful: ${uploadedUrl}`)
+        onUpload(uploadedUrl)
       } catch (error) {
-        console.error("Erreur d'upload", error);
-        alert("Erreur lors de l'envoi de l'image.");
+        console.error("[SingleImageUpload] ❌ Erreur d'upload", error)
+        console.error("[SingleImageUpload] 🔍 Error details:", error instanceof Error ? error.message : error)
+        alert(`Erreur lors du téléchargement de l'image: ${error instanceof Error ? error.message : "Erreur inconnue"}`)
       } finally {
         setIsUploading(false);
       }
