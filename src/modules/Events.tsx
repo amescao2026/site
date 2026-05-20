@@ -6,6 +6,7 @@ import { getEvents, getMediaUrl, renderBlocksToText } from "../services/supabase
 import { EventData, translations } from "../types";
 import { useLanguage } from "../components/LanguageContext";
 import { useTheme } from "../components/ThemeContext";
+import HtmlContent from "../components/HtmlContent";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Timeline from "../components/Timeline";
@@ -170,7 +171,7 @@ export default function Events() {
                                 <Calendar className="w-12 h-12 text-zinc-400" />
                               </div>
                             )}
-                            <div className="absolute top-4 left-4 px-3 py-1 bg-emerald-600 text-white rounded-full text-xs font-bold uppercase tracking-wider">
+                            <div className={`absolute top-3 left-3 px-2.5 md:px-3 py-1 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest backdrop-blur-md z-10 ${isDark ? 'bg-black/60 text-zinc-200' : 'bg-white/90 text-stone-700'}`}>
                               {new Date(event.date).toLocaleDateString(
                                 language === "fr" ? "fr-FR" : "en-US",
                                 { year: "numeric", month: "long" },
@@ -181,9 +182,10 @@ export default function Events() {
                             <h3 className="text-xl font-bold mb-3 group-hover:text-emerald-600 transition-colors leading-tight">
                               {event.title}
                             </h3>
-                            <p className={`text-sm line-clamp-3 mb-5 leading-relaxed text-justify ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
-                              {renderBlocksToText(event.content)}
-                            </p>
+                            <HtmlContent
+                              html={event.content}
+                              className={`text-sm line-clamp-3 mb-5 leading-relaxed text-justify ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
+                            />
                             <button className="text-emerald-600 font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">
                               {t.events.readMore} →
                             </button>
@@ -228,9 +230,10 @@ export default function Events() {
                           </div>
                         )}
                         <h4 className="text-xl font-bold">{event.title}</h4>
-                        <p className={`text-sm leading-relaxed text-justify ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
-                          {renderBlocksToText(event.content)}
-                        </p>
+                        <HtmlContent
+                          html={event.content}
+                          className={`text-sm leading-relaxed text-justify ${isDark ? "text-zinc-400" : "text-zinc-500"}`}
+                        />
                         <button
                           onClick={() => setSelectedEvent(event)}
                           className="text-emerald-600 font-bold text-xs uppercase tracking-widest hover:underline"

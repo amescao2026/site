@@ -3,8 +3,9 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EventData } from '../types';
-import { getMediaUrl, renderBlocksToText } from '../services/supabase';
+import { getMediaUrl } from '../services/supabase';
 import { useTheme } from '../components/ThemeContext';
+import HtmlContent from './HtmlContent';
 import Image from 'next/image';
 import { X, Calendar, MapPin } from 'lucide-react';
 
@@ -114,11 +115,12 @@ export default function EventModal({ event, onClose }: EventModalProps) {
             )}
 
             <div className={`prose max-w-none ${isDark ? 'prose-invert' : ''}`}>
-              <p className={`text-base leading-relaxed whitespace-pre-wrap ${
-                isDark ? 'text-zinc-300' : 'text-stone-600'
-              }`}>
-                {renderBlocksToText(event.content)}
-              </p>
+              <HtmlContent
+                html={event.content}
+                className={`text-base leading-relaxed ${
+                  isDark ? 'text-zinc-300' : 'text-stone-600'
+                }`}
+              />
             </div>
 
             {/* Galerie other_photos */}

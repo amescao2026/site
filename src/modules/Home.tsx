@@ -6,8 +6,7 @@ import {
   getEvents,
   getReports,
   getBoardMembers,
-  getMediaUrl,
-  renderBlocksToText
+  getMediaUrl
 } from '../services/supabase';
 import { EventData, ReportData, BoardMemberData, translations, Language } from '../types';
 import { useLanguage } from '../components/LanguageContext';
@@ -18,6 +17,7 @@ import Timeline from '../components/Timeline';
 import EventModal from '../components/EventModal';
 import { HeroSection } from '../components/HeroSection';
 import Image from 'next/image';
+import HtmlContent from '../components/HtmlContent';
 import { FileText, Users, Calendar, ArrowRight, Heart, Download, ExternalLink, ChevronDown, Menu, X as XIcon } from 'lucide-react';
 
 export default function Home() {
@@ -474,10 +474,11 @@ export default function Home() {
                         }`}>
                         {event.title}
                       </h3>
-                      <p className={`text-sm leading-relaxed line-clamp-3 mb-4 ${isDark ? 'text-zinc-400' : 'text-stone-500'
-                        }`}>
-                        {renderBlocksToText(event.content)}
-                      </p>
+                      <HtmlContent
+                        html={event.content}
+                        className={`text-sm leading-relaxed line-clamp-3 mb-4 ${isDark ? 'text-zinc-400' : 'text-stone-500'
+                        }`}
+                      />
                       <button className="flex items-center gap-2 px-3.5 md:px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-sm shadow-emerald-900/20">
                         <ExternalLink size={12} /> Lire
                       </button>
